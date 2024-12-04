@@ -18,7 +18,7 @@ const Carousel = () => {
       autoplay={{ delay: 6000, disableOnInteraction: false }}
       loop={true}
       speed={600} 
-      className="w-full h-[600px] mb-10" 
+      className="w-full h-[600px] mb-10 rounded" 
     >
       <SwiperSlide className="relative w-full h-full"> {/* Tailwind classes replacing styles.swiperSlide */}
         <Image

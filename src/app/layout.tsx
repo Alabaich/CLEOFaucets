@@ -30,7 +30,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <a href="#main-content" className="skip-link">
+        <a href="#main-content" className="skip-link text-[#000000]">
           Skip to main content
         </a>
         <Header />
