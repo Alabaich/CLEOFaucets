@@ -43,3 +43,5 @@ next-env.d.ts
 src/utils/
 
 .next/cache/
+
+functions/.next
