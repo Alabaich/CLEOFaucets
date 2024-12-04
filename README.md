@@ -1,3 +1,6 @@
+# CLEOFaucets
+Custom Next.js App for brand name CLEO Faucets. Technology Stack, Next.js, firebase.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
