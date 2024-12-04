@@ -1,3 +1,9 @@
 {
-  "extends": ["next/core-web-vitals", "next/typescript"]
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "ignorePatterns": [
+    "functions/.next/**/*", // Ignore Next.js build output in functions
+    ".next/**/*",            // In case there are any in the root
+    "lib/**/*",              // Ignore built files
+    "generated/**/*"         // Ignore generated files
+  ]
 }
