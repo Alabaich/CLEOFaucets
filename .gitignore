@@ -47,3 +47,5 @@ src/utils/
 functions/.next
 
 .env.local
+
+src/utils
