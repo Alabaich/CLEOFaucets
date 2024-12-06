@@ -138,6 +138,14 @@ const Header = () => {
           >
             Contact
           </Link>
+          <Link
+            href="/blog"
+            className={`text-gray-300 hover:text-white ${
+              pathname === "/blog" ? "text-white font-semibold" : ""
+            }`}
+          >
+            Blog
+          </Link>
         </nav>
       </div>
     </header>
