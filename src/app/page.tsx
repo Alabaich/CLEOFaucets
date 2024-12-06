@@ -7,10 +7,11 @@ import FirebaseTestComponent from "@/components/FirebaseTestComponent";
 import { db } from "@/utils/firebaseAdmin";
 import Slider from "@/components/slider";
 import DualFeature from "@/components/DualFeature";
+import Innovation from "@/components/Innovations";
 
 const HomePage = () => {
   return (
-    <main>
+    <main className="flex flex-col gap-[150px]">
       <div className="fullWidth ">
         <Carousel />
       </div>
@@ -23,8 +24,9 @@ const HomePage = () => {
           buttonText="Explore Now"
           buttonLink="/collections"
         />
-        <DualFeature />
       </section>
+      <DualFeature />
+      <Innovation />
       <Slider />
     </main>
   );
