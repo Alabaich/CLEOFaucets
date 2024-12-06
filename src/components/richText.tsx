@@ -7,12 +7,7 @@ interface RichTextProps {
   buttonLink: string;
 }
 
-const RichText: React.FC<RichTextProps> = ({
-  title,
-  text,
-  buttonText,
-  buttonLink,
-}) => {
+const RichText: React.FC<RichTextProps> = ({title,text,buttonText,buttonLink}) => {
   return (
     <div className="flex flex-col items-center text-center p-6 sm:p-12 rounded-lg shadow-lg">
       {/* Title */}
@@ -34,3 +29,6 @@ const RichText: React.FC<RichTextProps> = ({
 };
 
 export default RichText;
+
+
+

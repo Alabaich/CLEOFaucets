@@ -3,6 +3,11 @@
 
 import Carousel from '../components/Carousel'; // Correct default import
 import RichText from '@/components/richText';
+import FirebaseTestComponent from '@/components/FirebaseTestComponent';
+import { db } from '@/utils/firebaseAdmin';
+
+
+
 
 const HomePage = () => {
   return (
@@ -20,6 +25,7 @@ const HomePage = () => {
         buttonLink="/collections"
       />
       </section>
+      <FirebaseTestComponent />
     </main>
   );
 };

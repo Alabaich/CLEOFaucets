@@ -45,3 +45,5 @@ src/utils/
 .next/cache/
 
 functions/.next
+
+.env.local

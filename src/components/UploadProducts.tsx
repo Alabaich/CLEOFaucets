@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 
@@ -16,7 +16,7 @@ const UploadProducts = () => {
 
   const handleUpload = async () => {
     if (!file) {
-      setMessage("Please select an Excel file to upload.");
+      setMessage("Please select a CSV file to upload.");
       return;
     }
 
@@ -31,45 +31,27 @@ const UploadProducts = () => {
       });
 
       const data = await res.json();
-
       if (res.ok) {
         setMessage("Products uploaded successfully!");
         setFile(null);
       } else {
         setMessage(`Error: ${data.error}`);
       }
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error("Error during upload:", error.message);
-        setMessage(`An unexpected error occurred: ${error.message}`);
-      } else {
-        console.error("Unknown error during upload:", error);
-        setMessage("An unexpected error occurred.");
-      }
+    } catch (error) {
+      setMessage("An unexpected error occurred.");
     } finally {
       setIsUploading(false);
     }
   };
 
   return (
-    <div className="bg-white p-6 rounded-md shadow-md">
-      <h2 className="text-2xl font-semibold mb-4">Upload Products</h2>
-      <input
-        type="file"
-        accept=".xlsx, .xls"
-        onChange={handleFileChange}
-        className="mb-4"
-      />
-      <button
-        onClick={handleUpload}
-        disabled={isUploading}
-        className={`bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 ${
-          isUploading ? "opacity-50 cursor-not-allowed" : ""
-        }`}
-      >
+    <div>
+      <h1>Upload Products</h1>
+      <input type="file" accept=".csv" onChange={handleFileChange} />
+      <button onClick={handleUpload} disabled={isUploading}>
         {isUploading ? "Uploading..." : "Upload"}
       </button>
-      {message && <p className="mt-4 text-gray-700">{message}</p>}
+      {message && <p>{message}</p>}
     </div>
   );
 };
