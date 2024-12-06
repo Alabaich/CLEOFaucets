@@ -18,9 +18,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }));
 
     res.status(200).json({ blogs });
-  } catch (error) {
-    console.error("Error fetching blogs:", error);
-    res.status(500).json({ error: error.message || "Internal server error" });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      // TypeScript now knows that error is an instance of Error
+      console.error("Error fetching blogs:", error);
+      res.status(500).json({ error: error.message || "Internal server error" });
+    } else {
+      console.error("Unexpected error:", error);
+      res.status(500).json({ error: "Unknown error occurred" });
+    }
   }
 };
 
