@@ -45,9 +45,9 @@ const UploadProducts = () => {
   };
 
   return (
-    <div>
-      <h1>Upload Products</h1>
-      <input type="file" accept=".csv" onChange={handleFileChange} />
+    <div className="bg-white shadow-sm p-4 rounded-md">
+      <h1 className="text-black">Upload Products</h1>
+      <input type="file" accept=".csv" onChange={handleFileChange} className="text-black"/>
       <button onClick={handleUpload} disabled={isUploading}>
         {isUploading ? "Uploading..." : "Upload"}
       </button>

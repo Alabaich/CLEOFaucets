@@ -1,26 +1,16 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import admin from "../../utils/firebaseAdmin"; // Import the initialized admin instance
+import admin from "../../utils/firebaseAdmin";
 import multer from "multer";
 import csvParser from "csv-parser";
 import fs from "fs";
 import path from "path";
 import fetch from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
+import sharp from "sharp";
 
 // Initialize Firestore and Storage
 const db = admin.firestore();
 const storageBucket = admin.storage().bucket();
-
-// Check Firebase connection
-(async () => {
-  try {
-    // Check Firestore connection
-    await db.collection("Products").limit(1).get();
-    console.log("Firestore connection: Successful");
-  } catch (error) {
-    console.error("Firebase connection check failed:", error);
-  }
-})();
 
 // Multer configuration for handling file uploads
 const upload = multer({ dest: path.join(process.cwd(), "/tmp") });
@@ -37,16 +27,20 @@ const uploadImageToStorage = async (imageUrl: string, folder: string): Promise<s
     const response = await fetch(imageUrl);
     const buffer = await response.buffer();
     const contentType = response.headers.get("content-type");
+
     if (!contentType || !contentType.startsWith("image/")) {
       throw new Error(`Invalid image content type: ${contentType}`);
     }
 
-    const extension = contentType.split("/")[1];
-    const fileName = `${folder}/${uuidv4()}.${extension}`;
+    const webpBuffer = await sharp(buffer)
+      .webp() // Convert to .webp format
+      .toBuffer();
+
+    const fileName = `${folder}/${uuidv4()}.webp`;
     const file = storageBucket.file(fileName);
 
-    await file.save(buffer, { metadata: { contentType } });
-    await file.makePublic();
+    await file.save(webpBuffer, { metadata: { contentType: "image/webp" } });
+    await file.makePublic(); // Make the file publicly accessible
 
     return `https://storage.googleapis.com/${storageBucket.name}/${fileName}`;
   } catch (error) {
@@ -59,12 +53,11 @@ const uploadImageToStorage = async (imageUrl: string, folder: string): Promise<s
 interface CsvRow {
   Type: "Product" | "Variant";
   sku: string;
-  Title?: string; // Only for products
-  Vendor?: string; // Only for products
-  Tags?: string; // Comma-separated, will be converted to string[]
+  Title?: string;
+  Tags?: string;
   ProductType?: string;
   description?: string;
-  Images?: string; // Comma-separated, will be converted to string[]
+  Images?: string;
 }
 
 interface ProcessedProduct {
@@ -135,7 +128,7 @@ const processCSV = async (filePath: string): Promise<ProcessedProduct[]> => {
   });
 };
 
-// Main API handler
+// Main API handler for CSV upload
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -161,22 +154,39 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(400).json({ error: "No file uploaded. Please try again." });
     }
 
-    console.log("Uploaded file:", file);
-
-    if (!file.path) {
-      return res.status(400).json({ error: "File upload failed. Please try again." });
-    }
-
     const filePath = file.path;
 
     // Process CSV
     const products: ProcessedProduct[] = await processCSV(filePath);
 
-    // Save to Firestore
+    // Save Products, Collections, and SubCollections
     for (const product of products) {
       const { sku, title, description, collection, tags, images, variants } = product;
 
-      console.log("Saving product to Firestore:", product);
+      // Ensure Collection exists or create it
+      const collectionRef = db.collection("Collections").doc(collection);
+      const collectionDoc = await collectionRef.get();
+      if (!collectionDoc.exists) {
+        await collectionRef.set({
+          name: collection,
+          id: collection,
+        });
+        console.log(`Collection created: ${collection}`);
+      }
+
+      // Ensure SubCollections exist and create them if needed
+      for (const tag of tags) {
+        const subCollectionRef = db.collection("SubCollections").doc(tag);
+        const subCollectionDoc = await subCollectionRef.get();
+        if (!subCollectionDoc.exists) {
+          await subCollectionRef.set({
+            name: tag,
+            id: tag,
+            collections: [collection], // Link the subcollection to the collection
+          });
+          console.log(`SubCollection created: ${tag}`);
+        }
+      }
 
       // Process each image URL in the product and variants
       const processedImages = await Promise.all(images.map((imageUrl) => uploadImageToStorage(imageUrl, "products")));
@@ -193,12 +203,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       await productRef.set({
         title,
         description,
-        collection,
-        tags,
+        collection,  // Reference to the collection name
+        tags,         // Reference to the subcollections (tags)
         images: processedImages, // Save the processed image URLs
         variants: processedVariants,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
+
+      console.log(`Product saved: ${sku}`);
     }
 
     // Clean up temporary file
@@ -206,10 +218,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     res.status(200).json({ message: "Products uploaded and saved to Firestore successfully" });
   } catch (error: any) {
-    console.error("Error processing upload:", {
-      message: error.message,
-      stack: error.stack,
-    });
+    console.error("Error processing upload:", error);
     res.status(500).json({ error: error.message || "Internal server error" });
   }
 };
