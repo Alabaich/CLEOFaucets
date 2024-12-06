@@ -7,31 +7,31 @@ const HorizontalScroller = () => {
       image: "/images/image1.png",
       title: "Title 1",
       description: "From $999",
-      link: "https://www.apple.com/shop/buy-iphone/iphone-16-pro",
+      link: "#",
     },
     {
       image: "/images/image1.png",
       title: "Title 10",
       description: "From $399 or $33.25/mo. for 12 mo.",
-      link: "https://www.apple.com/shop/buy-watch/apple-watch",
+      link: "#",
     },
     {
       image: "/images/image1.png",
       title: "Title mini",
       description: "From $499",
-      link: "https://www.apple.com/shop/buy-ipad/ipad-mini",
+      link: "#",
+    },
+    {
+      image: "images/image1.png",
+      title: "Title mini",
+      description: "From $499",
+      link: "#",
     },
     {
       image: "/images/image1.png",
       title: "Title mini",
       description: "From $499",
-      link: "https://www.apple.com/shop/buy-ipad/ipad-mini",
-    },
-    {
-      image: "/images/image1.png",
-      title: "Title mini",
-      description: "From $499",
-      link: "https://www.apple.com/shop/buy-ipad/ipad-mini",
+      link: "#",
     },
   ];
 

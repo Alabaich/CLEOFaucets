@@ -6,6 +6,7 @@ import RichText from "@/components/richText";
 import FirebaseTestComponent from "@/components/FirebaseTestComponent";
 import { db } from "@/utils/firebaseAdmin";
 import Slider from "@/components/slider";
+import DualFeature from "@/components/DualFeature";
 
 const HomePage = () => {
   return (
@@ -22,6 +23,7 @@ const HomePage = () => {
           buttonText="Explore Now"
           buttonLink="/collections"
         />
+        <DualFeature />
       </section>
       <Slider />
     </main>
