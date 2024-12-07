@@ -1,8 +1,8 @@
 // app/blog/[slug]/page.tsx
 
 import React from 'react';
-import Image from 'next/image';
 import Head from 'next/head';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 interface Blog {
@@ -17,7 +17,11 @@ interface Blog {
 }
 
 const formatDate = (timestamp: any): string => {
-  if (timestamp && timestamp._seconds !== undefined && timestamp._nanoseconds !== undefined) {
+  if (
+    timestamp &&
+    typeof timestamp._seconds === 'number' &&
+    typeof timestamp._nanoseconds === 'number'
+  ) {
     const fireBaseTime = new Date(
       timestamp._seconds * 1000 + timestamp._nanoseconds / 1000000
     );
@@ -34,12 +38,11 @@ const formatDate = (timestamp: any): string => {
   }
 };
 
-// Define a helper function to fetch data from API
+// Helper function to fetch blog data by slug
 const fetchBlogBySlug = async (slug: string): Promise<Blog | null> => {
-  // Construct the absolute URL
-  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
-  const host = process.env.VERCEL_URL || 'localhost:3000'; // Adjust if deployed differently
-  const url = `${protocol}://${host}/api/get-blog-by-slug?slug=${slug}`;
+  // Use environment variable for base URL
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cleo-plumbing.web.app';
+  const url = `${baseUrl}/api/get-blog-by-slug?slug=${encodeURIComponent(slug)}`;
 
   const res = await fetch(url, {
     cache: 'no-store', // Ensure fresh data
@@ -57,67 +60,82 @@ const fetchBlogBySlug = async (slug: string): Promise<Blog | null> => {
   return data.blog;
 };
 
-const BlogPost = async ({ params }: { params: { slug: string } }) => {
-  const { slug } = params;
-
-  if (!slug) {
-    notFound();
-  }
-
-  try {
-    const blog = await fetchBlogBySlug(slug);
-
-    if (!blog) {
+const BlogPost = async ({ params: paramsPromise }: { params: Promise<{ slug: string }> }) => {
+    const params = await paramsPromise; // Await the params
+  
+    if (!params || !params.slug) {
       notFound();
     }
-
-    return (
-      <div className="max-w-4xl mx-auto p-4">
-        <Head>
-          <title>{blog.title} | Your Site Name</title>
-          <meta name="description" content={blog.content.slice(0, 150)} />
-          <meta property="og:title" content={blog.title} />
-          <meta property="og:description" content={blog.content.slice(0, 150)} />
-          <meta property="og:image" content={blog.image} />
-          {/* Add more meta tags as needed */}
-        </Head>
-
-        <h1 className="text-4xl font-bold text-white">{blog.title}</h1>
-        <p className="text-gray-300 mt-2">
-          <span>Kirill (Design Director)</span> • <span>{formatDate(blog.createdAt)}</span>
-        </p>
-        <div className="w-full h-auto mt-4 rounded-md relative">
-          <Image
-            src={blog.image}
-            alt={blog.title}
-            fill
-            style={{ objectFit: 'cover' }}
-            className="rounded-md"
-            priority={true} // Optional: Preload important images
-          />
+  
+    const { slug } = params;
+  
+    console.log("Fetching blog with slug:", slug);
+  
+    try {
+      const blog = await fetchBlogBySlug(slug);
+  
+      if (!blog) {
+        notFound();
+      }
+  
+      return (
+        <div className="p-4 fullWidth flex flex-col gap-8">
+          {/* Header Section */}
+          <div className="text-center flex justify-center flex-col gap-6 mt-4">
+            <p className="text-sm font-bold uppercase text-gray-500">
+              {blog.tags[0] || "Uncategorized"}
+            </p>
+            <h1 className="text-4xl font-bold text-white">{blog.title}</h1>
+            <span className="text-gray-300">Author: Kirill (Design Director)</span>
+            <div className="flex items-center justify-center">
+              <p className="text-sm text-gray-500 mr-4">
+                <span>{formatDate(blog.createdAt)}</span>
+              </p>
+              <span>|</span>
+              <p className="text-sm text-gray-500 ml-4">
+                <span>{blog.readingTime} min read</span>
+              </p>
+            </div>
+          </div>
+  
+          <div className="mt-8 relative w-full h-[500px] overflow-hidden">
+            <img
+              src={blog.image}
+              alt={blog.title}
+              className="w-full h-full object-cover rounded-md"
+              loading="eager"
+            />
+          </div>
+  
+          <div className="text-left max-w-[1100px] mx-auto">
+            {blog.content.split("\n").map((paragraph, idx) => (
+              <p key={idx} className="text-lg mt-4">
+                {paragraph}
+              </p>
+            ))}
+          </div>
+  
+          <div className="flex gap-4 w-full justify-center flex-wrap md:w-[1100px]">
+            {blog.tags.map((tag) => (
+              <Link
+                key={tag}
+                href={`/blog/${encodeURIComponent(tag)}`}
+                className="text-white border border-white py-2 px-4 rounded transition-all duration-300 hover:bg-white hover:text-black hover:no-underline hover:border-transparent"
+                aria-label={`Filter blogs by ${tag}`}
+              >
+                {tag}
+              </Link>
+            ))}
+          </div>
         </div>
-        <div className="mt-6 text-white">
-          {/* Assuming content is plain text. If it's HTML, use dangerouslySetInnerHTML */}
-          <p>{blog.content}</p>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {blog.tags.map(tag => (
-            <a
-              key={tag}
-              href={`/blog/${tag}`} // Adjust based on tag routing
-              className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-blue-500 hover:text-white transition-colors duration-300"
-              aria-label={`Filter blogs by ${tag}`}
-            >
-              {tag}
-            </a>
-          ))}
-        </div>
-      </div>
-    );
-  } catch (error) {
-    console.error("Error fetching blog post:", error);
-    notFound();
-  }
-};
+      );
+    } catch (error) {
+      console.error("Error fetching blog post:", error);
+      notFound();
+    }
+  };
+  
+  export default BlogPost;
+  
 
-export default BlogPost;
+

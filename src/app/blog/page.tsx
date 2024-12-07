@@ -114,7 +114,7 @@ export default function Blog() {
   }
 
   if (filteredBlogs.length === 0) {
-    return <p className="text-center text-white">No blogs found for "{selectedTag}".</p>;
+    return <p className="text-center text-white">No blogs found for &ldquo;{selectedTag}&ldquo;.</p>;
   }
 
   // Extract the first blog as featured and the rest as other blogs
@@ -123,9 +123,9 @@ export default function Blog() {
 
   return (
     <div className="text-center my-10 md:my-10 w-full mx-auto fullWidth">
-      <p className="text-sm font-bold uppercase text-white">Blog Updates</p>
-      <h1 className="text-3xl font-semibold text-white mt-2">Latest Blogs</h1>
-      <p className="text-lg text-gray-300 mt-1">Stay updated with our latest posts</p>
+      <p className="text-sm font-bold uppercase text-white">Stay Updated</p>
+      <h1 className="text-3xl font-semibold text-white mt-2">Cleo Faucets News</h1>
+      <p className="text-lg text-gray-300 mt-1">Every detail matters when creating spaces that inspire. Explore the Cleo Faucets blog for fresh ideas and expert tips to transform your kitchen and bath into true reflections of modern living.</p>
 
       {/* Tag Navigation */}
       <div className="flex flex-wrap gap-2 mt-4 justify-center">
