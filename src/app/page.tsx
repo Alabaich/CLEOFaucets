@@ -3,8 +3,6 @@
 
 import Carousel from "../components/Carousel"; // Correct default import
 import RichText from "@/components/richText";
-import FirebaseTestComponent from "@/components/FirebaseTestComponent";
-import { db } from "@/utils/firebaseAdmin";
 import Slider from "@/components/slider";
 import DualFeature from "@/components/DualFeature";
 import Innovation from "@/components/Innovations";

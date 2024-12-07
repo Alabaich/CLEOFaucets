@@ -21,7 +21,7 @@ const ContactPage = () => {
         <div className="flex-1">
           <h2 className="text-2xl font-bold mb-4">Contact Us</h2>
           <p className="mb-4">
-            Have questions or need assistance? We're here to help!
+            Have questions or need assistance? We&apos;re here to help!
           </p>
           <div className="flex items-center gap-2 text-lg">
             <span className="text-gray-400">📞</span>

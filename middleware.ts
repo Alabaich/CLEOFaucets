@@ -21,7 +21,7 @@ export async function middleware(req: NextRequest) {
 
     try {
       const decodedToken = await admin.auth().verifyIdToken(token);
-      const allowedEmails = ["enjoyable.design@gmail.com", "info@plumbingmarket.ca"];
+      const allowedEmails = ["enjoyable.design@gmail.com", "info@plumbingmarket.ca", "14alabaika88@gmail.com"];
 
       if (!decodedToken.email || !allowedEmails.includes(decodedToken.email)) {
         const loginUrl = req.nextUrl.clone();

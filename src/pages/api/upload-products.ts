@@ -171,7 +171,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           name: collection,
           id: collection,
         });
-        console.log(`Collection created: ${collection}`);
       }
 
       // Ensure SubCollections exist and create them if needed
@@ -184,7 +183,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             id: tag,
             collections: [collection], // Link the subcollection to the collection
           });
-          console.log(`SubCollection created: ${tag}`);
         }
       }
 
@@ -210,7 +208,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      console.log(`Product saved: ${sku}`);
+
     }
 
     // Clean up temporary file

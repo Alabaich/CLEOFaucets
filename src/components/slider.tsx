@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useRef } from "react";
 import Link from "next/link";
 
@@ -35,17 +37,19 @@ const HorizontalScroller = () => {
     },
   ];
 
-  const scrollerRef = useRef(null);
+  // Step 1: Define the ref type as HTMLDivElement
+  const scrollerRef = useRef<HTMLDivElement>(null);
 
+  // Step 2: Safely access scrollerRef.current using optional chaining
   const scrollLeft = () => {
-    scrollerRef.current.scrollBy({
+    scrollerRef.current?.scrollBy({
       left: -480,
       behavior: "smooth",
     });
   };
 
   const scrollRight = () => {
-    scrollerRef.current.scrollBy({
+    scrollerRef.current?.scrollBy({
       left: 480,
       behavior: "smooth",
     });
