@@ -3,8 +3,8 @@ import Link from "next/link";
 
 const DualFeature = () => {
   return (
-    <div className="fullWidth flex gap-8 justify-between">
-      <div className="relative w-1/2 h-[500px]">
+    <div className="fullWidth flex flex-col md:flex-row gap-8 justify-between">
+      <div className="relative w-full md:w-1/2 h-[500px]">
         <img
           src="images/image1.png"
           alt="Bathroom"
@@ -27,7 +27,7 @@ const DualFeature = () => {
         </div>
       </div>
 
-      <div className="relative w-1/2">
+      <div className="relative w-full md:w-1/2 h-[500px]">
         <img
           src="images/image1.png"
           alt="Kitchen"

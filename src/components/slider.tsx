@@ -37,10 +37,8 @@ const HorizontalScroller = () => {
     },
   ];
 
-  // Step 1: Define the ref type as HTMLDivElement
   const scrollerRef = useRef<HTMLDivElement>(null);
 
-  // Step 2: Safely access scrollerRef.current using optional chaining
   const scrollLeft = () => {
     scrollerRef.current?.scrollBy({
       left: -480,
@@ -62,9 +60,10 @@ const HorizontalScroller = () => {
       </div>
 
       <div className="group relative w-full">
+        {/* Hide buttons on small screens */}
         <button
           onClick={scrollLeft}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-200 p-4 rounded-full shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
+          className="hidden sm:block absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-200 p-4 rounded-full shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
           aria-label="Scroll Left"
         >
           <img
@@ -76,14 +75,13 @@ const HorizontalScroller = () => {
 
         <div
           ref={scrollerRef}
-          className="pl-[150px] pr-[150px] rf-cards-scroller w-full overflow-x-auto flex space-x-8 overflow-x-hidden"
-          style={{ scrollBehavior: "smooth" }}
+          className="pl-[50px] md:pl-[150px] pr-[50px] md:pr-[150px] rf-cards-scroller w-full overflow-x-auto md:overflow-x-hidden flex space-x-8 snap-x snap-mandatory touch-pan-x"
+          style={{ WebkitOverflowScrolling: "touch", scrollBehavior: "smooth" }}
         >
           {items.map((item, index) => (
             <div
               key={index}
-              className="rf-cards-scroller-item flex-shrink-0 h-[350px] flex items-center justify-center"
-              style={{ width: "480px" }}
+              className="rf-cards-scroller-item flex-shrink-0 w-[350px] md:w-[480px] h-[350px] flex items-center justify-center snap-center"
             >
               <Link
                 href={item.link}
@@ -108,7 +106,7 @@ const HorizontalScroller = () => {
 
         <button
           onClick={scrollRight}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-200 p-4 rounded-full shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
+          className="hidden sm:block absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-200 p-4 rounded-full shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
           aria-label="Scroll Right"
         >
           <img

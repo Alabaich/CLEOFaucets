@@ -127,12 +127,11 @@ const Innovation = () => {
         <h2 className="text-3xl font-bold">Innovative Solutions</h2>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-12">
+      <div className="flex flex-wrap justify-center mt-8 mb-4 md:mt-0 md:mb-0 gap-4 md:gap-12">
         {items.map((item, index) => (
           <div
             key={index}
-            className="innovation-item flex flex-col items-center justify-center p-4 rounded-lg relative group"
-            style={{ width: "300px", height: "300px" }}
+            className="innovation-item flex flex-col items-center justify-center w-[300px] md:h-[300px] md:p-4 rounded-lg relative group"
           >
             {item.svg && (
               <div
