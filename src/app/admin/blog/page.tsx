@@ -62,6 +62,28 @@ const UploadBlogsPage = () => {
     setShowUploadSingleBlog(true);
   };
 
+  const handleDeleteClick = async (blogId: string) => {
+    const confirmDelete = confirm("Are you sure you want to delete this article?");
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`/api/delete-blog?id=${blogId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete blog");
+      }
+
+      // Remove the deleted blog from state
+      setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== blogId));
+      alert("Blog deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting blog:", error);
+      alert("Failed to delete the blog. Please try again.");
+    }
+  };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -118,12 +140,20 @@ const UploadBlogsPage = () => {
                   <p className="text-sm text-gray-400">Tags: {blog.tags.join(", ")}</p>
                 </div>
               </div>
-              <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                onClick={() => handleEditClick(blog)}
-              >
-                Edit
-              </button>
+              <div className="flex flex-col gap-2">
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                  onClick={() => handleEditClick(blog)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                  onClick={() => handleDeleteClick(blog.id)}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>

@@ -78,8 +78,8 @@ export default function SubCollectionPage() {
   if (!subcollection) {
     return (
       <p className="text-center text-white">
-        Subcollection not found for collection "{collectionSlug}" and subcollection "
-        {subcollectionSlug}".
+        Subcollection not found for collection &quot;{collectionSlug}&quot; and subcollection &quot;
+        {subcollectionSlug}&quot;.
       </p>
     );
   }
