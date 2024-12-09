@@ -4,10 +4,7 @@ import admin from "../../utils/firebaseAdmin";
 const db = admin.firestore();
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  console.log("Request received:", req.method, req.query);
-
   if (req.method !== "GET") {
-    console.warn("Invalid HTTP method:", req.method);
     return res.status(405).json({ error: "Method not allowed" });
   }
 
@@ -15,48 +12,52 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   try {
     if (collectionSlug && subcollectionSlug) {
-      // Validate query parameters
+      // Fetch a specific subcollection
       if (
         typeof collectionSlug !== "string" ||
         typeof subcollectionSlug !== "string"
       ) {
-        console.error(
-          "Invalid query parameters for specific subcollection:",
-          { collectionSlug, subcollectionSlug }
-        );
         return res
           .status(400)
           .json({ error: "Invalid query parameters for specific subcollection" });
       }
 
-      console.log("Fetching specific subcollection:", {
-        collectionSlug,
-        subcollectionSlug,
-      });
-
-      // Query SubCollections with matching collectionSlug and subcollectionSlug
       const subcollectionSnapshot = await db
         .collection("SubCollections")
-        .where("collections", "array-contains", collectionSlug) // Match collectionSlug in collections array
-        .where("slug", "==", subcollectionSlug) // Match subcollection slug
+        .where("collections", "array-contains", collectionSlug)
+        .where("slug", "==", subcollectionSlug)
         .get();
 
       if (subcollectionSnapshot.empty) {
-        console.warn("No matching subcollection found");
         return res.status(404).json({ error: "Subcollection not found" });
       }
 
-      // Extract the first matching subcollection
       const subcollection = subcollectionSnapshot.docs[0].data();
-      console.log("Subcollection found:", subcollection);
-
       return res.status(200).json({ subcollection });
-    } else {
-      console.log("Fetching all subcollections");
+    } else if (collectionSlug) {
+      // Fetch all subcollections for a collectionSlug
+      if (typeof collectionSlug !== "string") {
+        return res
+          .status(400)
+          .json({ error: "Invalid query parameter for collectionSlug" });
+      }
 
+      const subcollectionsSnapshot = await db
+        .collection("SubCollections")
+        .where("collections", "array-contains", collectionSlug)
+        .get();
+
+      const subcollections = subcollectionsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return res.status(200).json({ subcollections });
+    } else {
       // Fetch all subcollections
-      const subcollectionSnapshot = await db.collection("SubCollections").get();
-      const subcollections = subcollectionSnapshot.docs.map((doc) => ({
+      const subcollectionsSnapshot = await db.collection("SubCollections").get();
+
+      const subcollections = subcollectionsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
