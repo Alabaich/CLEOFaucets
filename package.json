@@ -9,11 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tiptap/core": "^2.10.3",
+    "@tiptap/html": "^2.10.3",
+    "@tiptap/react": "^2.10.3",
+    "@tiptap/starter-kit": "^2.10.3",
     "axios": "^1.7.9",
     "csv-parser": "^3.0.0",
     "firebase": "^11.0.2",
     "firebase-admin": "^13.0.1",
     "formidable": "^3.5.2",
+    "he": "^1.2.0",
     "multer": "^1.4.5-lts.1",
     "next": "15.0.3",
     "node-fetch": "^3.3.2",
@@ -27,6 +32,7 @@
   },
   "devDependencies": {
     "@types/formidable": "^3.4.5",
+    "@types/he": "^1.2.3",
     "@types/multer": "^1.4.12",
     "@types/node": "^20",
     "@types/react": "^18",

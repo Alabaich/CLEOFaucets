@@ -1,4 +1,4 @@
-// pages/api/create-blog.ts
+// pages/api/upload-single-blog.ts
 
 import { NextApiRequest, NextApiResponse } from "next";
 import admin from "../../utils/firebaseAdmin";

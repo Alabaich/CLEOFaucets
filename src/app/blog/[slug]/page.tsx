@@ -4,6 +4,7 @@ import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import he from 'he';
 
 interface Blog {
   id: string;
@@ -61,79 +62,79 @@ const fetchBlogBySlug = async (slug: string): Promise<Blog | null> => {
 };
 
 const BlogPost = async ({ params: paramsPromise }: { params: Promise<{ slug: string }> }) => {
-    const params = await paramsPromise; // Await the params
-  
-    if (!params || !params.slug) {
+  const params = await paramsPromise;
+
+  if (!params || !params.slug) {
+    notFound();
+  }
+
+  const { slug } = params;
+
+  try {
+    const blog = await fetchBlogBySlug(slug);
+
+    if (!blog) {
       notFound();
     }
-  
-    const { slug } = params;
-  
-    console.log("Fetching blog with slug:", slug);
-  
-    try {
-      const blog = await fetchBlogBySlug(slug);
-  
-      if (!blog) {
-        notFound();
-      }
-  
-      return (
-        <div className="p-4 fullWidth flex flex-col gap-8">
-          {/* Header Section */}
-          <div className="text-center flex justify-center flex-col gap-6 mt-4">
-            <p className="text-sm font-bold uppercase text-gray-500">
-              {blog.tags[0] || "Uncategorized"}
+
+    return (
+      <div className="p-4 fullWidth flex flex-col gap-8">
+        {/* Header Section */}
+        <div className="text-center flex justify-center flex-col gap-6 mt-4">
+          <p className="text-sm font-bold uppercase text-gray-500">
+            {blog.tags[0] || "Uncategorized"}
+          </p>
+          <h1 className="text-4xl font-bold text-white">{blog.title}</h1>
+          <span className="text-gray-300">Author: Kirill (Design Director)</span>
+          <div className="flex items-center justify-center">
+            <p className="text-sm text-gray-500 mr-4">
+              <span>{formatDate(blog.createdAt)}</span>
             </p>
-            <h1 className="text-4xl font-bold text-white">{blog.title}</h1>
-            <span className="text-gray-300">Author: Kirill (Design Director)</span>
-            <div className="flex items-center justify-center">
-              <p className="text-sm text-gray-500 mr-4">
-                <span>{formatDate(blog.createdAt)}</span>
-              </p>
-              <span>|</span>
-              <p className="text-sm text-gray-500 ml-4">
-                <span>{blog.readingTime} min read</span>
-              </p>
-            </div>
-          </div>
-  
-          <div className="mt-8 relative w-full h-[500px] overflow-hidden">
-            <img
-              src={blog.image}
-              alt={blog.title}
-              className="w-full h-full object-cover rounded-md"
-              loading="eager"
-            />
-          </div>
-  
-          <div className="text-left max-w-[1100px] mx-auto">
-            {blog.content.split("\n").map((paragraph, idx) => (
-              <p key={idx} className="text-lg mt-4">
-                {paragraph}
-              </p>
-            ))}
-          </div>
-  
-          <div className="flex gap-4 w-full justify-center flex-wrap md:w-[1100px]">
-            {blog.tags.map((tag) => (
-              <Link
-                key={tag}
-                href={`/blog/${encodeURIComponent(tag)}`}
-                className="text-white border border-white py-2 px-4 rounded transition-all duration-300 hover:bg-white hover:text-black hover:no-underline hover:border-transparent"
-                aria-label={`Filter blogs by ${tag}`}
-              >
-                {tag}
-              </Link>
-            ))}
+            <span>|</span>
+            <p className="text-sm text-gray-500 ml-4">
+              <span>{blog.readingTime} min read</span>
+            </p>
           </div>
         </div>
-      );
-    } catch (error) {
-      console.error("Error fetching blog post:", error);
-      notFound();
-    }
-  };
+
+        <div className="mt-8 relative w-full h-[500px] overflow-hidden">
+          <img
+            src={blog.image}
+            alt={blog.title}
+            className="w-full h-full object-cover rounded-md"
+            loading="eager"
+          />
+        </div>
+
+        {/* Render HTML content */}
+        <div className="text-left max-w-[1100px] mx-auto">
+        <div
+  dangerouslySetInnerHTML={{ __html: he.decode(blog.content) }}
+  className="text-lg mt-4"
+/>
+</div>
+
+
+        <div className="flex gap-4 w-full justify-center flex-wrap md:w-[1100px]">
+          {blog.tags.map((tag) => (
+            <Link
+              key={tag}
+              href={`/blog/${encodeURIComponent(tag)}`}
+              className="text-white border border-white py-2 px-4 rounded transition-all duration-300 hover:bg-white hover:text-black hover:no-underline hover:border-transparent"
+              aria-label={`Filter blogs by ${tag}`}
+            >
+              {tag}
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  } catch (error) {
+    console.error("Error fetching blog post:", error);
+    notFound();
+  }
+};
+
   
   export default BlogPost;
   
