@@ -81,17 +81,17 @@ const BlogPost = async ({ params: paramsPromise }: { params: Promise<{ slug: str
       <div className="p-4 fullWidth flex flex-col gap-8">
         {/* Header Section */}
         <div className="text-center flex justify-center flex-col gap-6 mt-4">
-          <p className="text-sm font-bold uppercase text-gray-500">
+          <p className="text-sm font-bold uppercase text-gray-400">
             {blog.tags[0] || "Uncategorized"}
           </p>
           <h1 className="text-4xl font-bold text-white">{blog.title}</h1>
           <span className="text-gray-300">Author: Kirill (Design Director)</span>
           <div className="flex items-center justify-center">
-            <p className="text-sm text-gray-500 mr-4">
+            <p className="text-sm text-gray-400 mr-4">
               <span>{formatDate(blog.createdAt)}</span>
             </p>
             <span>|</span>
-            <p className="text-sm text-gray-500 ml-4">
+            <p className="text-sm text-gray-400 ml-4">
               <span>{blog.readingTime} min read</span>
             </p>
           </div>
@@ -107,7 +107,7 @@ const BlogPost = async ({ params: paramsPromise }: { params: Promise<{ slug: str
         </div>
 
         {/* Render HTML content */}
-        <div className="text-left max-w-[1100px] mx-auto">
+        <div className="articleContainer text-left max-w-[1100px] mx-auto">
         <div
   dangerouslySetInnerHTML={{ __html: he.decode(blog.content) }}
   className="text-lg mt-4"
