@@ -8,6 +8,7 @@ import { useState } from "react";
 const Header = () => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCollectionsOpen, setIsCollectionsOpen] = useState(false);
 
   const collections = [
     { name: "Toilets", path: "/collections/toilets" },
@@ -26,7 +27,6 @@ const Header = () => {
             height={60}
           />
         </Link>
-        
         <button
           className="text-white bg-gray-900 border border-white hover:bg-gray-800 focus:ring-2 focus:outline-none focus:ring-gray-300 rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -42,13 +42,19 @@ const Header = () => {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+              d={
+                isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"
+              }
             />
           </svg>
         </button>
       </div>
 
-      <nav className={`${isMenuOpen ? "block" : "hidden"} ml-4 mr-4 mb-4 mt-2 sm:hidden flex flex-col gap-4`}>
+      <nav
+        className={`${
+          isMenuOpen ? "block" : "hidden"
+        } ml-4 mr-4 mb-4 mt-2 sm:hidden flex flex-col gap-4`}
+      >
         <Link
           href="/"
           className={`text-gray-300 hover:text-white ${
@@ -59,19 +65,21 @@ const Header = () => {
         </Link>
 
         <div className="relative">
-          <Link
-            href="/collections"
-            className={`text-gray-300 hover:text-white flex items-center ${
+          <button
+            onClick={() => setIsCollectionsOpen(!isCollectionsOpen)}
+            className={`text-gray-300 p-0 bg-gray-900 hover:bg-gray-900 hover:text-white flex items-center w-full text-left bg-gray-800 ${
               pathname?.startsWith("/collections")
                 ? "text-white font-semibold"
                 : ""
             }`}
             aria-haspopup="true"
-            aria-expanded={isMenuOpen}
+            aria-expanded={isCollectionsOpen}
           >
             Collections
             <svg
-              className="ml-1 h-4 w-4 transition-transform duration-200 group-hover:rotate-180"
+              className={`ml-1 h-4 w-4 transition-transform duration-200 ${
+                isCollectionsOpen ? "rotate-180" : ""
+              }`}
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -84,9 +92,22 @@ const Header = () => {
                 d="M19 9l-7 7-7-7"
               />
             </svg>
-          </Link>
-          <div className={`${isMenuOpen ? "block" : "hidden"} mt-2 w-full bg-gray-800 rounded-md shadow-lg`}>
+          </button>
+          <div
+            className={`${
+              isCollectionsOpen ? "block" : "hidden"
+            } mt-2 w-full bg-gray-800 rounded-md shadow-lg`}
+          >
             <ul className="py-1 w-full">
+              <li>
+                <Link
+                  href="/collections"
+                  className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                >
+                  All Collections
+                </Link>
+              </li>
+
               {collections.map((collection) => (
                 <li key={collection.name}>
                   <Link
