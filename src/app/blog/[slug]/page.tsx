@@ -1,10 +1,10 @@
 // app/blog/[slug]/page.tsx
 
-import React from 'react';
-import Head from 'next/head';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import he from 'he';
+import React from "react";
+import Head from "next/head";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import he from "he";
 
 interface Blog {
   id: string;
@@ -20,20 +20,20 @@ interface Blog {
 const formatDate = (timestamp: any): string => {
   if (
     timestamp &&
-    typeof timestamp._seconds === 'number' &&
-    typeof timestamp._nanoseconds === 'number'
+    typeof timestamp._seconds === "number" &&
+    typeof timestamp._nanoseconds === "number"
   ) {
     const fireBaseTime = new Date(
       timestamp._seconds * 1000 + timestamp._nanoseconds / 1000000
     );
 
     const options: Intl.DateTimeFormatOptions = {
-      day: '2-digit',
-      month: 'short', // e.g., "Dec"
-      year: 'numeric',
+      day: "2-digit",
+      month: "short", // e.g., "Dec"
+      year: "numeric",
     };
 
-    return fireBaseTime.toLocaleDateString('en-GB', options);
+    return fireBaseTime.toLocaleDateString("en-GB", options);
   } else {
     return "Unknown Date";
   }
@@ -42,11 +42,14 @@ const formatDate = (timestamp: any): string => {
 // Helper function to fetch blog data by slug
 const fetchBlogBySlug = async (slug: string): Promise<Blog | null> => {
   // Use environment variable for base URL
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cleo-plumbing.web.app';
-  const url = `${baseUrl}/api/get-blog-by-slug?slug=${encodeURIComponent(slug)}`;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || "https://cleo-plumbing.web.app";
+  const url = `${baseUrl}/api/get-blog-by-slug?slug=${encodeURIComponent(
+    slug
+  )}`;
 
   const res = await fetch(url, {
-    cache: 'no-store', // Ensure fresh data
+    cache: "no-store", // Ensure fresh data
   });
 
   if (res.status === 404) {
@@ -54,14 +57,18 @@ const fetchBlogBySlug = async (slug: string): Promise<Blog | null> => {
   }
 
   if (!res.ok) {
-    throw new Error('Failed to fetch blog');
+    throw new Error("Failed to fetch blog");
   }
 
   const data = await res.json();
   return data.blog;
 };
 
-const BlogPost = async ({ params: paramsPromise }: { params: Promise<{ slug: string }> }) => {
+const BlogPost = async ({
+  params: paramsPromise,
+}: {
+  params: Promise<{ slug: string }>;
+}) => {
   const params = await paramsPromise;
 
   if (!params || !params.slug) {
@@ -78,14 +85,16 @@ const BlogPost = async ({ params: paramsPromise }: { params: Promise<{ slug: str
     }
 
     return (
-      <div className="p-4 fullWidth flex flex-col gap-8">
+      <div className="p-4 fullWidth flex flex-col gap-4 md:gap-8">
         {/* Header Section */}
         <div className="text-center flex justify-center flex-col gap-6 mt-4">
           <p className="text-sm font-bold uppercase text-gray-400">
             {blog.tags[0] || "Uncategorized"}
           </p>
           <h1 className="text-4xl font-bold text-white">{blog.title}</h1>
-          <span className="text-gray-300">Author: Kirill (Design Director)</span>
+          <span className="text-gray-300">
+            Author: Kirill (Design Director)
+          </span>
           <div className="flex items-center justify-center">
             <p className="text-sm text-gray-400 mr-4">
               <span>{formatDate(blog.createdAt)}</span>
@@ -108,19 +117,18 @@ const BlogPost = async ({ params: paramsPromise }: { params: Promise<{ slug: str
 
         {/* Render HTML content */}
         <div className="articleContainer text-left max-w-[1100px] mx-auto">
-        <div
-  dangerouslySetInnerHTML={{ __html: he.decode(blog.content) }}
-  className="text-lg mt-4"
-/>
-</div>
+          <div
+            dangerouslySetInnerHTML={{ __html: he.decode(blog.content) }}
+            className="text-lg mt-4"
+          />
+        </div>
 
-
-        <div className="flex gap-4 w-full justify-center flex-wrap md:w-[1100px]">
+        <div className="flex flex-wrap gap-4 md:pl-[150px] justify-start">
           {blog.tags.map((tag) => (
             <Link
               key={tag}
               href={`/blog/${encodeURIComponent(tag)}`}
-              className="text-white border border-white py-2 px-4 rounded transition-all duration-300 hover:bg-white hover:text-black hover:no-underline hover:border-transparent"
+              className="text-white border border-white py-2 px-4 gap-4 rounded transition-all duration-300 hover:bg-white hover:text-black hover:no-underline hover:border-transparent"
               aria-label={`Filter blogs by ${tag}`}
             >
               {tag}
@@ -135,8 +143,4 @@ const BlogPost = async ({ params: paramsPromise }: { params: Promise<{ slug: str
   }
 };
 
-  
-  export default BlogPost;
-  
-
-
+export default BlogPost;

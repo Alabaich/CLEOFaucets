@@ -60,7 +60,11 @@ export default function Blog() {
 
   // Format date as "DD MMM YYYY"
   const formatDate = (timestamp: any): string => {
-    if (timestamp && timestamp._seconds !== undefined && timestamp._nanoseconds !== undefined) {
+    if (
+      timestamp &&
+      timestamp._seconds !== undefined &&
+      timestamp._nanoseconds !== undefined
+    ) {
       const fireBaseTime = new Date(
         timestamp._seconds * 1000 + timestamp._nanoseconds / 1000000
       );
@@ -130,23 +134,28 @@ export default function Blog() {
   }
 
   // Extract the first blog as featured and the rest as other blogs
-  const featuredBlog = currentBlogs[0];
-  const otherBlogs = currentBlogs.slice(1);
+  const featuredBlog = currentPage === 1 ? currentBlogs[0] : null; // Only show featured on the first page
+  const otherBlogs = currentBlogs.slice(0);
 
   return (
     <div className="text-center my-10 md:my-10 w-full mx-auto fullWidth">
       <p className="text-sm font-bold uppercase text-white">Stay Updated</p>
-      <h1 className="text-3xl font-semibold text-white mt-2">Cleo Faucets News</h1>
+      <h1 className="text-3xl font-semibold text-white mt-2">
+        Cleo Faucets News
+      </h1>
       <p className="text-lg text-gray-300 mt-1">
-        Every detail matters when creating spaces that inspire. Explore the Cleo Faucets blog for
-        fresh ideas and expert tips to transform your kitchen and bath into true reflections of
-        modern living.
+        Every detail matters when creating spaces that inspire. Explore the Cleo
+        Faucets blog for fresh ideas and expert tips to transform your kitchen
+        and bath into true reflections of modern living.
       </p>
 
-      {/* Featured Blog */}
+      {/* Featured Blog, only show on the first page */}
       {featuredBlog && (
         <div className="group">
-          <Link href={`/blog/${slugify(featuredBlog.title)}`} className="hover:no-underline block">
+          <Link
+            href={`/blog/${slugify(featuredBlog.title)}`}
+            className="hover:no-underline block"
+          >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
               <div className="col-span-full relative h-[400px] overflow-hidden group">
                 <div
@@ -159,15 +168,33 @@ export default function Blog() {
                 <div className="h-full md:h-3/6 absolute bottom-0 left-0 right-0 bg-gradient-to-b from-transparent to-black/90 text-white p-4 flex justify-end flex-col text-left gap-2">
                   <p className="text-sm font-light">
                     <span className="mr-2">Kirill (Design Director)</span>•
-                    <span className="ml-2">{formatDate(featuredBlog.createdAt)}</span>
+                    <span className="ml-2">
+                      {formatDate(featuredBlog.createdAt)}
+                    </span>
                   </p>
-                  <h4 className="font-semibold text-xl">{featuredBlog.title}</h4>
+                  <h4 className="font-semibold text-xl">
+                    {featuredBlog.title}
+                  </h4>
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: he.decode(extractFirstParagraph(featuredBlog.content)),
+                      __html: he.decode(
+                        extractFirstParagraph(featuredBlog.content)
+                      ),
                     }}
                     className="text-gray-200"
                   />
+                  <div className="flex gap-4 justify-start flex-wrap md:w-[1100px]">
+                    {featuredBlog.tags.map((tag) => (
+                      <Link
+                        key={tag}
+                        href={`/blog/${encodeURIComponent(tag)}`}
+                        className="text-white border border-white py-2 px-4 rounded transition-all duration-300 hover:bg-white hover:text-black hover:no-underline hover:border-transparent"
+                        aria-label={`Filter blogs by ${tag}`}
+                      >
+                        {tag}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -179,7 +206,10 @@ export default function Blog() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
         {otherBlogs.map((blog) => (
           <div key={blog.id} className="group">
-            <Link href={`/blog/${slugify(blog.title)}`} className="hover:no-underline block">
+            <Link
+              href={`/blog/${slugify(blog.title)}`}
+              className="hover:no-underline block"
+            >
               <div className="rounded-md overflow-hidden shadow-md group">
                 <div
                   className="h-[250px] bg-cover bg-center transform transition-transform duration-500 ease-in-out group-hover:scale-110"
@@ -197,12 +227,76 @@ export default function Blog() {
                     }}
                     className=" text-gray-200"
                   />
+                  <div className="flex gap-4 justify-start flex-wrap">
+                    {blog.tags.slice(0, 3).map((tag) => (
+                      <Link
+                        key={tag}
+                        href={`/blog/${encodeURIComponent(tag)}`}
+                        className="text-white border border-white py-2 px-4 rounded transition-all duration-300 hover:bg-white hover:text-black hover:no-underline hover:border-transparent"
+                        aria-label={`Filter blogs by ${tag}`}
+                      >
+                        {tag}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
             </Link>
           </div>
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="mt-12 w-full mx-auto flex justify-between items-center">
+          {/* Previous Button */}
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`text-sm px-4 py-2 bg-gray-900 border rounded-md ${
+              currentPage === 1
+                ? "bg-transparent text-gray-600 hover:bg-white cursor-not-allowed"
+                : "bg-transparent text-white hover:bg-gray-900 hover:text-white"
+            } transition-colors duration-300`}
+            aria-label="Previous Page"
+          >
+            {"<"}
+          </button>
+
+          {/* Page Numbers */}
+          <div className="flex gap-2">
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+              (page) => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`text-sm px-4 py-2 bg-gray-900 border rounded-md ${
+                    currentPage === page
+                      ? "hover:bg-gray-900 border-white text-white"
+                      : "bg-transparent text-white border-white hover:bg-gray-900 hover:text-white"
+                  } transition-colors duration-300`}
+                  aria-label={`Go to page ${page}`}
+                >
+                  {page}
+                </button>
+              )
+            )}
+          </div>
+          {/* Next Button */}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`text-sm px-4 py-2 border rounded-md ${
+              currentPage === totalPages
+                ? "bg-transparent text-gray-600 hover:bg-white cursor-not-allowed"
+                : "bg-transparent text-white hover:bg-gray-900 hover:text-white"
+            } transition-colors duration-300`}
+            aria-label="Next Page"
+          >
+            {">"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
