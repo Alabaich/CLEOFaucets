@@ -19,7 +19,7 @@ const Footer = () => {
       </div>
 
       {/* Navigation Links */}
-      <nav className="flex flex-wrap justify-center gap-4 sm:gap-6">
+      <nav className="flex flex-col text-center md:flex-row md:flex-wrap justify-center gap-4 sm:gap-6">
         <Link
           href="/"
           className="text-gray-300 hover:text-white transition-colors duration-200"
