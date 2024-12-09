@@ -7,6 +7,7 @@ import path from "path";
 import fetch from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
 import sharp from "sharp";
+import { slugify } from "../../utils/slugify";
 
 // Initialize Firestore and Storage
 const db = admin.firestore();
@@ -33,14 +34,14 @@ const uploadImageToStorage = async (imageUrl: string, folder: string): Promise<s
     }
 
     const webpBuffer = await sharp(buffer)
-      .webp() // Convert to .webp format
+      .webp()
       .toBuffer();
 
     const fileName = `${folder}/${uuidv4()}.webp`;
     const file = storageBucket.file(fileName);
 
     await file.save(webpBuffer, { metadata: { contentType: "image/webp" } });
-    await file.makePublic(); // Make the file publicly accessible
+    await file.makePublic();
 
     return `https://storage.googleapis.com/${storageBucket.name}/${fileName}`;
   } catch (error) {
@@ -135,7 +136,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    // Parse the uploaded CSV
     await new Promise<void>((resolve, reject) => {
       upload.single("file")(req as any, {} as any, (err) => {
         if (err) {
@@ -150,70 +150,72 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const file = (req as any).file;
 
     if (!file) {
-      console.error("File not uploaded correctly.");
       return res.status(400).json({ error: "No file uploaded. Please try again." });
     }
 
     const filePath = file.path;
-
-    // Process CSV
     const products: ProcessedProduct[] = await processCSV(filePath);
 
-    // Save Products, Collections, and SubCollections
     for (const product of products) {
       const { sku, title, description, collection, tags, images, variants } = product;
 
+      // Generate slug for collection
+      const collectionSlug = slugify(collection);
+
+      // Generate slug for the product
+      const productSlug = slugify(title);
+
       // Ensure Collection exists or create it
-      const collectionRef = db.collection("Collections").doc(collection);
+      const collectionRef = db.collection("Collections").doc(collectionSlug);
       const collectionDoc = await collectionRef.get();
       if (!collectionDoc.exists) {
-        await collectionRef.set({
-          name: collection,
-          id: collection,
-        });
+        await collectionRef.set({ name: collection, slug: collectionSlug });
       }
 
-      // Ensure SubCollections exist and create them if needed
+      // Ensure SubCollections exist and create/update them
       for (const tag of tags) {
-        const subCollectionRef = db.collection("SubCollections").doc(tag);
+        const tagSlug = slugify(tag);
+        const subCollectionRef = db.collection("SubCollections").doc(tagSlug);
         const subCollectionDoc = await subCollectionRef.get();
+
         if (!subCollectionDoc.exists) {
           await subCollectionRef.set({
             name: tag,
-            id: tag,
-            collections: [collection], // Link the subcollection to the collection
+            slug: tagSlug,
+            collections: [collectionSlug],
           });
+        } else {
+          const existingCollections = subCollectionDoc.data()?.collections || [];
+          if (!existingCollections.includes(collectionSlug)) {
+            await subCollectionRef.update({
+              collections: admin.firestore.FieldValue.arrayUnion(collectionSlug),
+            });
+          }
         }
       }
 
-      // Process each image URL in the product and variants
-      const processedImages = await Promise.all(images.map((imageUrl) => uploadImageToStorage(imageUrl, "products")));
+      const processedImages = await Promise.all(images.map((img) => uploadImageToStorage(img, "products")));
       const processedVariants = await Promise.all(
         variants.map(async (variant) => {
-          const processedVariantImages = await Promise.all(variant.images.map((imageUrl) => uploadImageToStorage(imageUrl, "variants")));
+          const processedVariantImages = await Promise.all(variant.images.map((img) => uploadImageToStorage(img, "variants")));
           return { ...variant, images: processedVariantImages };
         })
       );
 
-      // Save the product to Firestore
       const productRef = db.collection("Products").doc(sku);
-
       await productRef.set({
         title,
+        slug: productSlug, // Add the product slug
         description,
-        collection,  // Reference to the collection name
-        tags,         // Reference to the subcollections (tags)
-        images: processedImages, // Save the processed image URLs
+        collection: collectionSlug,
+        tags: tags.map((tag) => slugify(tag)),
+        images: processedImages,
         variants: processedVariants,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
-
-
     }
 
-    // Clean up temporary file
     fs.unlinkSync(filePath);
-
     res.status(200).json({ message: "Products uploaded and saved to Firestore successfully" });
   } catch (error: any) {
     console.error("Error processing upload:", error);
@@ -222,3 +224,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default handler;
+

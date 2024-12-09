@@ -3,6 +3,7 @@ import admin from "../../utils/firebaseAdmin";
 import fetch from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
 import sharp from "sharp";
+import { slugify } from "../../utils/slugify"; // Import your slugify function
 
 // Initialize Firestore and Storage
 const db = admin.firestore();
@@ -12,7 +13,7 @@ const storageBucket = admin.storage().bucket();
 const uploadImageToStorage = async (imageUrl: string, folder: string): Promise<string> => {
   try {
     const response = await fetch(imageUrl);
-    const buffer = await response.arrayBuffer(); // ArrayBuffer instead of buffer
+    const buffer = await response.arrayBuffer();
     const contentType = response.headers.get("content-type");
 
     if (!contentType || !contentType.startsWith("image/")) {
@@ -44,25 +45,45 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { sku, title, description, collection, tags, images, variants } = req.body;
 
+    // Generate slug for collection
+    const collectionSlug = slugify(collection);
+
+    // Generate slug for the product
+    const productSlug = slugify(title);
+
     // Ensure Collection exists or create it
-    const collectionRef = db.collection("Collections").doc(collection);
+    const collectionRef = db.collection("Collections").doc(collectionSlug);
     const collectionDoc = await collectionRef.get();
     if (!collectionDoc.exists) {
-      await collectionRef.set({ name: collection, id: collection });
+      await collectionRef.set({ name: collection, slug: collectionSlug });
     }
 
-    // Ensure SubCollections exist and create them if needed
-    for (const tag of tags) {
-      const subCollectionRef = db.collection("SubCollections").doc(tag);
+    // Ensure SubCollections exist and create/update them
+    for (const tag of tags as string[]) {
+      const tagSlug: string = slugify(tag);
+      const subCollectionRef = db.collection("SubCollections").doc(tagSlug);
       const subCollectionDoc = await subCollectionRef.get();
+
       if (!subCollectionDoc.exists) {
+        // Create new subcollection
         await subCollectionRef.set({
           name: tag,
-          id: tag,
-          collections: [collection],
+          slug: tagSlug,
+          collections: [collectionSlug], // Reference collection slug
         });
+      } else {
+        // Update existing subcollection to include the new collectionSlug if not already present
+        const existingCollections = subCollectionDoc.data()?.collections || [];
+        if (!existingCollections.includes(collectionSlug)) {
+          await subCollectionRef.update({
+            collections: admin.firestore.FieldValue.arrayUnion(collectionSlug),
+          });
+        }
       }
     }
+
+    // Update tags to use slugs
+    const tagSlugs: string[] = (tags as string[]).map((tag) => slugify(tag));
 
     // Process images for product
     const processedImages = await Promise.all(images.map((img: string) => uploadImageToStorage(img, "products")));
@@ -70,12 +91,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Process variants and their images
     const processedVariants = await Promise.all(
       variants.map(async (variant: { sku: string; images: string | string[] }) => {
-        // Ensure images are a string before splitting
         const variantImages = Array.isArray(variant.images)
-          ? variant.images.join(",") // If it's an array, join into a string
-          : variant.images; // If it's already a string, use as is
-
-        const processedVariantImages = await Promise.all(variantImages.split(",").map((img: string) => uploadImageToStorage(img, "variants")));
+          ? variant.images
+          : variant.images.split(",");
+        const processedVariantImages = await Promise.all(variantImages.map((img: string) => uploadImageToStorage(img, "variants")));
         return { ...variant, images: processedVariantImages };
       })
     );
@@ -88,9 +107,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       // Product exists, update it
       await productRef.update({
         title,
+        slug: productSlug, // Add the product slug
         description,
-        collection,
-        tags,
+        collection: collectionSlug,
+        tags: tagSlugs,
         images: processedImages,
         variants: processedVariants,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -101,9 +121,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       // Product doesn't exist, create it
       await productRef.set({
         title,
+        slug: productSlug, // Add the product slug
         description,
-        collection,
-        tags,
+        collection: collectionSlug,
+        tags: tagSlugs,
         images: processedImages,
         variants: processedVariants,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),

@@ -5,10 +5,10 @@ import { useAuth } from "../../../context/AuthContext";
 import { useRouter } from "next/navigation";
 import UploadSingleProduct from "../../../components/UploadSingleProduct";
 import UploadProducts from "../../../components/UploadProducts";
-import { FaEllipsisV } from "react-icons/fa"; // 3 dots icon
+import { FaEllipsisV } from "react-icons/fa";
 
 interface Product {
-  id: string; // This is the unique identifier for the product
+  id: string;
   title: string;
   images: string[];
 }
@@ -60,9 +60,24 @@ const UploadProductsPage = () => {
   };
 
   const handleEditClick = (product: Product) => {
-    setProductToEdit(product);  // Set the product to edit
-    setShowUploadSingleProduct(true);  // Open the upload form for the selected product
-    setShowBulkUpload(false);  // Close the bulk upload
+    setProductToEdit(product);
+    setShowUploadSingleProduct(true);
+    setShowBulkUpload(false);
+  };
+
+  const handleDeleteClick = async (productId: string) => {
+    const confirmDelete = confirm("Are you sure you want to delete this product?");
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`/api/delete-product?id=${productId}`, { method: "DELETE" });
+      if (!res.ok) {
+        throw new Error("Failed to delete product");
+      }
+      setProducts((prevProducts) => prevProducts.filter((product) => product.id !== productId));
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
   };
 
   if (loading) {
@@ -101,13 +116,11 @@ const UploadProductsPage = () => {
           )}
         </div>
       </div>
-          <div className="py-6">
-          {showUploadSingleProduct && (
-        <UploadSingleProduct productToEdit={productToEdit} />
-      )}
-      {showBulkUpload && <UploadProducts />}
-          </div>
 
+      <div className="py-6">
+        {showUploadSingleProduct && <UploadSingleProduct productToEdit={productToEdit} />}
+        {showBulkUpload && <UploadProducts />}
+      </div>
 
       {loadingProducts ? (
         <p>Loading products...</p>
@@ -120,21 +133,29 @@ const UploadProductsPage = () => {
             >
               <div className="flex items-center gap-4">
                 <img
-                  src={product.images[0]} // Show first image
+                  src={product.images[0]}
                   alt={product.title}
                   className="w-16 h-16 object-cover rounded"
                 />
                 <div>
                   <h5 className="text-md font-semibold text-black">{product.title}</h5>
-                  <p className="text-sm text-gray-600">SKU: {product.id}</p> {/* Display product ID */}
+                  <p className="text-sm text-gray-600">SKU: {product.id}</p>
                 </div>
               </div>
-              <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                onClick={() => handleEditClick(product)}
-              >
-                Edit
-              </button>
+              <div className="flex gap-2">
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                  onClick={() => handleEditClick(product)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                  onClick={() => handleDeleteClick(product.id)}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>

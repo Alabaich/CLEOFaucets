@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 
 const UploadSingleCollection = ({ collectionToEdit }: { collectionToEdit: any }) => {
+  const [id, setId] = useState<string | null>(null);
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [image, setImage] = useState<string>("");
@@ -11,6 +12,7 @@ const UploadSingleCollection = ({ collectionToEdit }: { collectionToEdit: any })
 
   useEffect(() => {
     if (collectionToEdit) {
+      setId(collectionToEdit.id || null);
       setName(collectionToEdit.name);
       setDescription(collectionToEdit.description);
       setImage(collectionToEdit.image);
@@ -26,28 +28,33 @@ const UploadSingleCollection = ({ collectionToEdit }: { collectionToEdit: any })
     setIsUploading(true);
 
     const collectionData = {
+      id,
       name,
       description,
       image,
-      slug: name.toLowerCase().replace(/ /g, "-"), // Generate slug from name
     };
 
     try {
-      const res = await fetch("/api/upload-single-collection", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(collectionData),
-      });
+      const res = await fetch(
+        id ? "/api/update-single-collection" : "/api/upload-single-collection",
+        {
+          method: id ? "PATCH" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(collectionData),
+        }
+      );
 
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("Collection uploaded successfully!");
-        setName("");
-        setDescription("");
-        setImage("");
+        setMessage(id ? "Collection updated successfully!" : "Collection created successfully!");
+        if (!id) {
+          setName("");
+          setDescription("");
+          setImage("");
+        }
       } else {
         setMessage(`Error: ${data.error}`);
       }
@@ -67,7 +74,7 @@ const UploadSingleCollection = ({ collectionToEdit }: { collectionToEdit: any })
   return (
     <div className="bg-white p-6 rounded-md shadow-md text-black">
       <h2 className="text-2xl font-semibold mb-4">
-        {collectionToEdit ? "Edit Collection" : "Upload New Collection"}
+        {id ? "Edit Collection" : "Upload New Collection"}
       </h2>
 
       <div className="mb-4">
@@ -106,7 +113,7 @@ const UploadSingleCollection = ({ collectionToEdit }: { collectionToEdit: any })
           isUploading ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >
-        {isUploading ? "Uploading..." : "Upload"}
+        {isUploading ? "Uploading..." : id ? "Update" : "Create"}
       </button>
 
       {message && <p className="mt-4">{message}</p>}

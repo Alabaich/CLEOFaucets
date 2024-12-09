@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 
 const UploadSingleSubcollection = ({ subcollectionToEdit }: { subcollectionToEdit: any }) => {
+  const [id, setId] = useState<string | null>(null);
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [image, setImage] = useState<string>("");
@@ -12,10 +13,11 @@ const UploadSingleSubcollection = ({ subcollectionToEdit }: { subcollectionToEdi
 
   useEffect(() => {
     if (subcollectionToEdit) {
+      setId(subcollectionToEdit.id || null);
       setName(subcollectionToEdit.name);
       setDescription(subcollectionToEdit.description);
       setImage(subcollectionToEdit.image);
-      setParentCollection(subcollectionToEdit.collections[0]); // Assuming one parent collection
+      setParentCollection(subcollectionToEdit.collections[0] || ""); // Assuming one parent collection
     }
   }, [subcollectionToEdit]);
 
@@ -28,30 +30,35 @@ const UploadSingleSubcollection = ({ subcollectionToEdit }: { subcollectionToEdi
     setIsUploading(true);
 
     const subcollectionData = {
+      id,
       name,
       description,
       image,
       collections: [parentCollection],
-      slug: name.toLowerCase().replace(/ /g, "-"), // Generate slug from name
     };
 
     try {
-      const res = await fetch("/api/upload-single-subcollection", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(subcollectionData),
-      });
+      const res = await fetch(
+        id ? "/api/update-single-subcollection" : "/api/upload-single-subcollection",
+        {
+          method: id ? "PATCH" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(subcollectionData),
+        }
+      );
 
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("Subcollection uploaded successfully!");
-        setName("");
-        setDescription("");
-        setImage("");
-        setParentCollection("");
+        setMessage(id ? "Subcollection updated successfully!" : "Subcollection created successfully!");
+        if (!id) {
+          setName("");
+          setDescription("");
+          setImage("");
+          setParentCollection("");
+        }
       } else {
         setMessage(`Error: ${data.error}`);
       }
@@ -71,7 +78,7 @@ const UploadSingleSubcollection = ({ subcollectionToEdit }: { subcollectionToEdi
   return (
     <div className="bg-white p-6 rounded-md shadow-md text-black">
       <h2 className="text-2xl font-semibold mb-4">
-        {subcollectionToEdit ? "Edit Subcollection" : "Upload New Subcollection"}
+        {id ? "Edit Subcollection" : "Upload New Subcollection"}
       </h2>
 
       <div className="mb-4">
@@ -120,7 +127,7 @@ const UploadSingleSubcollection = ({ subcollectionToEdit }: { subcollectionToEdi
           isUploading ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >
-        {isUploading ? "Uploading..." : "Upload"}
+        {isUploading ? "Uploading..." : id ? "Update" : "Create"}
       </button>
 
       {message && <p className="mt-4">{message}</p>}
