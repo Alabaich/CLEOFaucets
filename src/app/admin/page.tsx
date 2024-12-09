@@ -9,7 +9,7 @@ const AdminDashboardPage = () => {
 
   useEffect(() => {
     // Redirect to Upload Products by default
-    router.push('/admin/upload-products');
+    router.push('/admin/products');
   }, [router]);
 
   return null; // Or a loading indicator if preferred
