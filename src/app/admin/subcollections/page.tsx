@@ -23,6 +23,8 @@ const SubcollectionsPage = () => {
   const [showUploadSingleSubcollection, setShowUploadSingleSubcollection] = useState<boolean>(false);
   const [subcollectionToEdit, setSubcollectionToEdit] = useState<Subcollection | null>(null);
 
+  const collectionSlug = null; // Replace this with a dynamic value if needed
+
   useEffect(() => {
     if (!loading && !user) {
       router.push("/admin/login");
@@ -32,12 +34,16 @@ const SubcollectionsPage = () => {
   useEffect(() => {
     const fetchSubcollections = async () => {
       try {
-        const res = await fetch("/api/get-subcollections");
+        const url = collectionSlug
+          ? `/api/get-subcollections?collectionSlug=${collectionSlug}`
+          : "/api/get-subcollections";
+
+        const res = await fetch(url);
         if (!res.ok) {
           throw new Error("Failed to fetch subcollections");
         }
         const data = await res.json();
-        setSubcollections(data.subcollections);
+        setSubcollections(data.subcollections || []);
       } catch (error) {
         console.error("Error fetching subcollections:", error);
       } finally {
@@ -46,7 +52,7 @@ const SubcollectionsPage = () => {
     };
 
     fetchSubcollections();
-  }, []);
+  }, [collectionSlug]);
 
   const handleMenuClick = () => {
     setShowUploadSingleSubcollection(true);
@@ -106,7 +112,7 @@ const SubcollectionsPage = () => {
             >
               <div className="flex items-center gap-4">
                 <img
-                  src={subcollection.image} // Display subcollection image
+                  src={subcollection.image}
                   alt={subcollection.name}
                   className="w-16 h-16 object-cover rounded"
                 />
