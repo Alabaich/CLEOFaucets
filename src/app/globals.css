@@ -65,5 +65,126 @@ button:hover {
   background-color: #9a67ea;
 }
 
-/* Additional global styles can be added here */
+/* Article styles */
 
+/* Headings */
+.articleContainer h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  line-height: normal;
+}
+
+.articleContainer h2 {
+  font-size: 2rem;
+  line-height: normal;
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.25rem;
+}
+
+.articleContainer h3 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+    line-height: normal;
+}
+
+.articleContainer h4 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+    line-height: normal;
+}
+
+/* Paragraphs */
+.articleContainer p {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  line-height: normal;
+}
+
+/* Links */
+.articleContainer a {
+  text-decoration: none;
+  font-weight: normal;
+  transition: color 0.3s ease;
+    line-height: normal;
+    text-decoration: underline;
+}
+
+.articleContainer a:hover {
+ font-weight: bold;
+}
+
+/* Lists */
+.articleContainer ul,
+.articleContainer ol {
+  margin: 1rem 0;
+  padding-left: 40px;
+}
+
+.articleContainer ul li,
+.articleContainer ol li {
+  margin-bottom: 0.5rem;
+  line-height: normal;
+}
+
+.articleContainer ul {
+  list-style-type: disc;
+}
+
+.articleContainer ol {
+  list-style-type: decimal;
+}
+
+/* Images */
+.articleContainer img {
+  max-width: 100%;
+  height: auto;
+  margin: 1rem 0;
+  display: block;
+}
+
+/* Blockquotes */
+.articleContainer blockquote {
+  font-style: italic;
+  margin: 1rem 0;
+  padding-left: 1rem;
+  border-left: 4px solid #ccc;
+}
+
+/* Tables */
+.articleContainer table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+.articleContainer table th,
+.articleContainer table td {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.articleContainer table th {
+  font-weight: bold;
+}
+
+.articleContainer table tr:nth-child(even) {
+  background-color: #373737;
+}
+
+/* Preformatted Text and Code */
+.articleContainer pre {
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.articleContainer code {
+  padding: 2px 4px;
+}
