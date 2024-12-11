@@ -43,7 +43,7 @@ body{
 }
 
 a {
-  color: #bb86fc; /* Accent color for links */
+  color: #ffffff; /* Accent color for links */
   text-decoration: none;
 }
 
@@ -51,9 +51,13 @@ a:hover {
   text-decoration: underline;
 }
 
+.group a:hover{
+  text-decoration: none;
+}
+
 button {
-  background-color: #bb86fc;
-  color: #121212;
+  background-color: #2c2d2c;
+  color: #fff;
   border: none;
   border-radius: 4px;
   padding: 10px 20px;
@@ -62,7 +66,7 @@ button {
 }
 
 button:hover {
-  background-color: #9a67ea;
+  background-color: #2c2d2c;
 }
 
 /* Article styles */

@@ -102,7 +102,7 @@ export default function CollectionPage() {
       {/* Full-width image */}
       <div className="w-full h-80 bg-gray-200">
         <img
-          src={collectionDetails.image || "/placeholder.webp"} // Placeholder if image is missing
+          src={collectionDetails.image || "https://firebasestorage.googleapis.com/v0/b/cleo-plumbing.firebasestorage.app/o/images%2FPlaceholder.webp?alt=media&token=28081801-2e80-4a97-a8af-c5f84a622d0b"} // Placeholder if image is missing
           alt={collectionDetails.name || "Placeholder"}
           className="w-full h-full object-cover"
         />
@@ -131,7 +131,7 @@ export default function CollectionPage() {
             }
           >
             <img
-              src={subcollection.image || "/placeholder.webp"} // Placeholder if image is missing
+              src={subcollection.image || "https://firebasestorage.googleapis.com/v0/b/cleo-plumbing.firebasestorage.app/o/images%2FPlaceholder.webp?alt=media&token=28081801-2e80-4a97-a8af-c5f84a622d0b"} // Placeholder if image is missing
               alt={subcollection.name}
               className="w-full h-full object-cover aspect-square"
             />

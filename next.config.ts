@@ -3,7 +3,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   distDir: ".next",
-  // You can add other Next.js configurations here
+
+};
+
+module.exports = {
+  images: {
+    domains: ["firebasestorage.googleapis.com"], // Add Firebase Storage domain here
+  },
 };
 
 export default nextConfig;

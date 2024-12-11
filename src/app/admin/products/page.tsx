@@ -101,13 +101,13 @@ const UploadProductsPage = () => {
           {showMenu && (
             <div className="absolute top-6 right-0 bg-white shadow-md rounded-md p-2 w-40">
               <button
-                className="w-full text-left py-2 px-4 text-sm bg-white hover:bg-blue-100"
+                className="text-black w-full text-left py-2 px-4 text-sm bg-white hover:bg-blue-100"
                 onClick={() => handleMenuClick("addProduct")}
               >
                 Add Product
               </button>
               <button
-                className="w-full text-left py-2 px-4 text-sm bg-white hover:bg-blue-100"
+                className="text-black w-full text-left py-2 px-4 text-sm bg-white hover:bg-blue-100"
                 onClick={() => handleMenuClick("bulkUpload")}
               >
                 Bulk Upload

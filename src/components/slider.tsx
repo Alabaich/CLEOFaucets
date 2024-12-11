@@ -66,7 +66,7 @@ const HorizontalScroller = () => {
         {/* Hide buttons on small screens */}
         <button
           onClick={scrollLeft}
-          className="hidden sm:block absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-200 p-4 rounded-full shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
+          className="hidden sm:block absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-200 p-4 rounded-full shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out pointer-events-auto"
           aria-label="Scroll Left"
         >
           <img
@@ -78,8 +78,11 @@ const HorizontalScroller = () => {
 
         <div
           ref={scrollerRef}
-          className="pl-[50px] md:pl-[150px] pr-[50px] md:pr-[150px] rf-cards-scroller w-full overflow-x-auto md:overflow-x-hidden flex space-x-8 snap-x snap-mandatory touch-pan-x"
-          style={{ WebkitOverflowScrolling: "touch", scrollBehavior: "smooth" }}
+          className="pl-[50px] md:pl-[150px] pr-[50px] md:pr-[150px] rf-cards-scroller w-full overflow-x-auto flex space-x-8 snap-x snap-mandatory touch-pan-x"
+          style={{
+            WebkitOverflowScrolling: "touch",
+            scrollBehavior: "smooth",
+          }}
         >
           {collections.map((collection) => (
             <div
@@ -93,7 +96,7 @@ const HorizontalScroller = () => {
               >
                 <div className="relative">
                   <img
-                    src={collection.image || "/placeholder.webp"} // Use placeholder if no image
+                    src={collection.image || "https://firebasestorage.googleapis.com/v0/b/cleo-plumbing.firebasestorage.app/o/images%2FPlaceholder.webp?alt=media&token=28081801-2e80-4a97-a8af-c5f84a622d0b"} // Use placeholder if no image
                     alt={collection.name}
                     className="w-full h-72 object-cover"
                   />
@@ -108,7 +111,7 @@ const HorizontalScroller = () => {
 
         <button
           onClick={scrollRight}
-          className="hidden sm:block absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-200 p-4 rounded-full shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
+          className="hidden sm:block absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-200 p-4 rounded-full shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out pointer-events-auto"
           aria-label="Scroll Right"
         >
           <img

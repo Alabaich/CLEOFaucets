@@ -24,6 +24,29 @@ interface Product {
   }[];
 }
 
+const groupOptionsByName = (variants: Product["variants"]) => {
+  const groupedOptions: Record<string, { value: string; image?: string }[]> = {};
+
+  variants.forEach((variant) => {
+    variant.options.forEach((option) => {
+      if (!groupedOptions[option.name]) {
+        groupedOptions[option.name] = [];
+      }
+      const existingOption = groupedOptions[option.name].find(
+        (opt) => opt.value === option.value
+      );
+      if (!existingOption) {
+        groupedOptions[option.name].push({
+          value: option.value,
+          image: variant.images[0], // Use the first image for color options
+        });
+      }
+    });
+  });
+
+  return groupedOptions;
+};
+
 export default function ProductPage() {
   const params = useParams();
   const router = useRouter();
@@ -33,6 +56,7 @@ export default function ProductPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
   const mainSwiperRef = useRef<any>(null);
 
@@ -47,6 +71,16 @@ export default function ProductPage() {
         setProduct(productData.product);
         if (productData.product.variants.length > 0) {
           setSelectedVariant(productData.product.variants[0].sku); // Set default variant
+
+          // Initialize selected options with default values
+          const defaultOptions = productData.product.variants[0].options.reduce(
+            (acc: Record<string, string>, option: { name: string; value: string }) => {
+              acc[option.name] = option.value;
+              return acc;
+            },
+            {}
+          );
+          setSelectedOptions(defaultOptions);
         }
       } catch (error) {
         console.error("Error fetching product details:", error);
@@ -58,14 +92,32 @@ export default function ProductPage() {
     fetchProduct();
   }, [productSlug]);
 
-  const handleVariantChange = (sku: string, variantIndex: number) => {
-    setSelectedVariant(sku);
+  useEffect(() => {
+    if (product && Object.keys(selectedOptions).length > 0) {
+      const matchingVariant = product.variants.find((variant) =>
+        variant.options.every(
+          (option) => selectedOptions[option.name] === option.value
+        )
+      );
 
-    // Update the active slide to the first image of the selected variant
-    if (mainSwiperRef.current) {
-      const offset = product!.images.length; // Offset after product images
-      mainSwiperRef.current.slideTo(offset + variantIndex);
+      if (matchingVariant) {
+        setSelectedVariant(matchingVariant.sku);
+
+        // Update the active slide to the first image of the selected variant
+        if (mainSwiperRef.current) {
+          const variantIndex = product.variants.indexOf(matchingVariant);
+          const offset = product.images.length; // Offset after product images
+          mainSwiperRef.current.slideTo(offset + variantIndex);
+        }
+      }
     }
+  }, [selectedOptions, product]);
+
+  const handleOptionChange = (optionName: string, optionValue: string) => {
+    setSelectedOptions((prev) => ({
+      ...prev,
+      [optionName]: optionValue,
+    }));
   };
 
   if (loading) return <p className="text-center text-white">Loading...</p>;
@@ -82,6 +134,8 @@ export default function ProductPage() {
     ...product.variants.flatMap((variant) => variant.images), // All variant images
   ];
 
+  const groupedOptions = groupOptionsByName(product.variants);
+
   return (
     <div className="fullWidth">
       <div className="flex justify-between flex-col md:flex-row w-full items-start md:items-center py-2">
@@ -95,14 +149,12 @@ export default function ProductPage() {
       </div>
       <div className="w-full flex flex-col md:flex-row md:gap-10 items-start md:items-start text-white">
         {/* Images Slider */}
-
         <div className="w-full md:max-w-[40%]">
           <Swiper
             modules={[Navigation, Pagination, Thumbs]}
             spaceBetween={10}
             slidesPerView={1}
             navigation
-
             thumbs={{ swiper: thumbsSwiper }}
             className="rounded-lg overflow-hidden mb-4"
             onSwiper={(swiper) => (mainSwiperRef.current = swiper)}
@@ -141,43 +193,47 @@ export default function ProductPage() {
           <h1 className="text-4xl font-bold mb-4">{product.title}</h1>
 
           {selectedVariant && (
-            <p className="text-lg font-semibold mb-2">
+            <p className="text-md font-regular mb-2">
               SKU: {selectedVariant}
             </p>
           )}
 
-          {/* Variants */}
-          {product.variants.length > 0 && (
-            <div className="mt-8">
-              <h2 className="text-2xl font-semibold mb-4">Select Options</h2>
-              <div className="flex items-center gap-4 flex-wrap">
-                {product.variants.map((variant, index) => (
-                  <div
-                    key={variant.sku}
-                    className={`relative w-12 h-12 rounded-full cursor-pointer border-2 ${selectedVariant === variant.sku
-                        ? "border-white"
-                        : "border-transparent"
-                      } overflow-hidden`}
-                    onClick={() => handleVariantChange(variant.sku, index)}
-                  >
-                    {variant.images[0] && (
-                      <img
-                        src={variant.images[0]}
-                        alt={`${variant.sku} - ${variant.options?.[0]?.value}`}
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                    <p className="text-xs text-center mt-2">
-                      {variant.options?.[0]?.value}
-                    </p>
-                  </div>
-                ))}
+          {/* Grouped Options */}
+          <div className="mt-8">
+            {Object.entries(groupedOptions).map(([optionName, values]) => (
+              <div key={optionName} className="mb-4">
+                <h4 className="text-md font-regular text-gray-300 mb-2">{optionName}:</h4>
+                <div className="flex items-center gap-4 flex-wrap">
+                  {values.map((option) => (
+                    <div
+                      key={option.value}
+                      className={`${
+                        optionName.toLowerCase() === "color"
+                          ? "w-12 h-12 rounded-full border-2"
+                          : "text-sm px-4 py-2 rounded-md border-2"
+                      } cursor-pointer ${
+                        selectedOptions[optionName] === option.value
+                          ? "border-white"
+                          : "border-gray-600"
+                      }`}
+                      onClick={() => handleOptionChange(optionName, option.value)}
+                    >
+                      {optionName.toLowerCase() === "color" && option.image ? (
+                        <img
+                          src={option.image}
+                          alt={option.value}
+                          className="w-full h-full rounded-full object-cover"
+                        />
+                      ) : (
+                        <span>{option.value}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
-
-
       </div>
       <div
         dangerouslySetInnerHTML={{ __html: he.decode(product.description) }}

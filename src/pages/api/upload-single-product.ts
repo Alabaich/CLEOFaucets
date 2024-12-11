@@ -21,7 +21,7 @@ const uploadImageToStorage = async (imageUrl: string, folder: string): Promise<s
     }
 
     const webpBuffer = await sharp(Buffer.from(buffer))
-      .webp() // Convert to .webp format
+      .webp()
       .toBuffer();
 
     const fileName = `${folder}/${uuidv4()}.webp`;
@@ -63,20 +63,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Ensure SubCollections exist and create/update them
-    for (const tag of tags as string[]) {
-      const tagSlug: string = slugify(tag);
+    for (const tag of tags || []) {
+      const tagSlug = slugify(tag);
       const subCollectionRef = db.collection("SubCollections").doc(tagSlug);
       const subCollectionDoc = await subCollectionRef.get();
 
       if (!subCollectionDoc.exists) {
-        // Create new subcollection
         await subCollectionRef.set({
           name: tag,
           slug: tagSlug,
-          collections: [collectionSlug], // Reference collection slug
+          collections: [collectionSlug],
         });
       } else {
-        // Update existing subcollection to include the new collectionSlug if not already present
         const existingCollections = subCollectionDoc.data()?.collections || [];
         if (!existingCollections.includes(collectionSlug)) {
           await subCollectionRef.update({
@@ -86,36 +84,42 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     }
 
-    // Update tags to use slugs
-    const tagSlugs: string[] = (tags as string[]).map((tag) => slugify(tag));
+    const tagSlugs = (tags || []).map((tag: string) => slugify(tag));
 
     // Process images for the product
     const processedImages = await Promise.all(images.map((img: string) => uploadImageToStorage(img, "products")));
 
     // Process variants and their images
-    const processedVariants = await Promise.all(
-      variants.map(async (variant: { sku: string; images: string[]; options: Array<{ name: string; value: string }> }) => {
-        const processedVariantImages = await Promise.all(
-          variant.images.map((img: string) => uploadImageToStorage(img, "variants"))
-        );
+// Process variants and their images
+const processedVariants = await Promise.all(
+  (variants || []).map(async (variant: { sku: string; images: string[] | string; options: Array<{ name: string; value: string }> }) => {
+    const imagesArray = Array.isArray(variant.images)
+      ? variant.images
+      : typeof variant.images === "string"
+      ? [variant.images]
+      : [];
 
-        return {
-          ...variant,
-          images: processedVariantImages,
-          options: variant.options || [], // Ensure options is always an array
-        };
-      })
+    const processedVariantImages = await Promise.all(
+      imagesArray.map((img: string) => uploadImageToStorage(img, "variants"))
     );
+
+    return {
+      ...variant,
+      images: processedVariantImages,
+      options: variant.options || [],
+    };
+  })
+);
+
 
     // Check if product already exists
     const productRef = db.collection("Products").doc(sku);
     const productDoc = await productRef.get();
 
     if (productDoc.exists) {
-      // Product exists, update it
       await productRef.update({
         title,
-        slug: productSlug, // Add the product slug
+        slug: productSlug,
         description,
         collection: collectionSlug,
         tags: tagSlugs,
@@ -126,10 +130,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       res.status(200).json({ message: "Product updated successfully!" });
     } else {
-      // Product doesn't exist, create it
       await productRef.set({
         title,
-        slug: productSlug, // Add the product slug
+        slug: productSlug,
         description,
         collection: collectionSlug,
         tags: tagSlugs,
