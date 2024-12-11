@@ -3,18 +3,36 @@
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+interface Collection {
+  id: string;
+  slug: string;
+  name: string;
+}
 
 const Header = () => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCollectionsOpen, setIsCollectionsOpen] = useState(false);
+  const [collections, setCollections] = useState<Collection[]>([]);
 
-  const collections = [
-    { name: "Toilets", path: "/collections/toilets" },
-    { name: "Faucets", path: "/collections/faucets" },
-    { name: "Tub Fillers", path: "/collections/tub-fillers" },
-  ];
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const res = await fetch("/api/get-collections");
+        if (!res.ok) {
+          throw new Error("Failed to fetch collections");
+        }
+        const data = await res.json();
+        setCollections(data.collections || []);
+      } catch (error) {
+        console.error("Error fetching collections:", error);
+      }
+    };
+
+    fetchCollections();
+  }, []);
 
   return (
     <header className="w-full bg-gray-900 fixed top-0 left-0 z-50">
@@ -96,9 +114,9 @@ const Header = () => {
           <div
             className={`${
               isCollectionsOpen ? "block" : "hidden"
-            } mt-2 w-full bg-gray-800 rounded-md shadow-lg`}
+            }  w-full bg-gray-800 rounded-md shadow-lg`}
           >
-            <ul className="py-1 w-full">
+            <ul className="w-full">
               <li>
                 <Link
                   href="/collections"
@@ -109,11 +127,11 @@ const Header = () => {
               </li>
 
               {collections.map((collection) => (
-                <li key={collection.name}>
+                <li key={collection.id}>
                   <Link
-                    href={collection.path}
+                    href={`/collections/${collection.slug}`}
                     className={`block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white ${
-                      pathname === collection.path
+                      pathname === `/collections/${collection.slug}`
                         ? "bg-gray-700 text-white"
                         : ""
                     }`}
@@ -198,14 +216,14 @@ const Header = () => {
                 />
               </svg>
             </Link>
-            <div className="absolute left-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
-              <ul className="py-1">
+            <div className="absolute left-0 w-48 bg-gray-800 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
+              <ul className="">
                 {collections.map((collection) => (
-                  <li key={collection.name}>
+                  <li key={collection.id}>
                     <Link
-                      href={collection.path}
+                      href={`/collections/${collection.slug}`}
                       className={`block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white ${
-                        pathname === collection.path
+                        pathname === `/collections/${collection.slug}`
                           ? "bg-gray-700 text-white"
                           : ""
                       }`}

@@ -18,9 +18,9 @@ const Carousel = () => {
       autoplay={{ delay: 6000, disableOnInteraction: false }}
       loop={true}
       speed={600} 
-      className="w-full h-[600px] mb-10 rounded" 
+      className="w-full h-[155px] sm:h-[350px] lg:h-[500px] 2xl:h-[600px] mb-10 rounded" 
     >
-      <SwiperSlide className="relative w-full h-full"> {/* Tailwind classes replacing styles.swiperSlide */}
+      <SwiperSlide className="relative w-full h-full "> {/* Tailwind classes replacing styles.swiperSlide */}
         <Image
           src="/images/image1.png" // Ensure these images exist in public/images/
           alt="Slide 1 Description"

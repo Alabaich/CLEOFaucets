@@ -1,42 +1,18 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 
-const HorizontalScroller = () => {
-  const items = [
-    {
-      image: "/images/image1.png",
-      title: "Title 1",
-      description: "From $999",
-      link: "#",
-    },
-    {
-      image: "/images/image1.png",
-      title: "Title 10",
-      description: "From $399 or $33.25/mo. for 12 mo.",
-      link: "#",
-    },
-    {
-      image: "/images/image1.png",
-      title: "Title mini",
-      description: "From $499",
-      link: "#",
-    },
-    {
-      image: "images/image1.png",
-      title: "Title mini",
-      description: "From $499",
-      link: "#",
-    },
-    {
-      image: "/images/image1.png",
-      title: "Title mini",
-      description: "From $499",
-      link: "#",
-    },
-  ];
+interface Collection {
+  id: string;
+  name: string;
+  slug: string;
+  image: string | null; // Allow null in case the image is missing
+}
 
+const HorizontalScroller = () => {
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   const scrollLeft = () => {
@@ -52,6 +28,33 @@ const HorizontalScroller = () => {
       behavior: "smooth",
     });
   };
+
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const res = await fetch("/api/get-collections");
+        if (!res.ok) {
+          throw new Error("Failed to fetch collections");
+        }
+        const data = await res.json();
+        setCollections(data.collections);
+      } catch (error) {
+        console.error("Error fetching collections:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCollections();
+  }, []);
+
+  if (loading) {
+    return <p className="text-center text-white">Loading collections...</p>;
+  }
+
+  if (collections.length === 0) {
+    return <p className="text-center text-white">No collections found.</p>;
+  }
 
   return (
     <div className="w-full">
@@ -78,25 +81,24 @@ const HorizontalScroller = () => {
           className="pl-[50px] md:pl-[150px] pr-[50px] md:pr-[150px] rf-cards-scroller w-full overflow-x-auto md:overflow-x-hidden flex space-x-8 snap-x snap-mandatory touch-pan-x"
           style={{ WebkitOverflowScrolling: "touch", scrollBehavior: "smooth" }}
         >
-          {items.map((item, index) => (
+          {collections.map((collection) => (
             <div
-              key={index}
+              key={collection.id}
               className="rf-cards-scroller-item flex-shrink-0 w-[350px] md:w-[480px] h-[350px] flex items-center justify-center snap-center"
             >
               <Link
-                href={item.link}
+                href={`/collections/${collection.slug}`}
                 className="rf-ccard block rounded-lg overflow-hidden text-decoration-none transform transition-all duration-300 ease-in-out hover:scale-105"
                 style={{ textDecoration: "none" }}
               >
                 <div className="relative">
                   <img
-                    src={item.image}
-                    alt={item.title}
+                    src={collection.image || "/placeholder.webp"} // Use placeholder if no image
+                    alt={collection.name}
                     className="w-full h-72 object-cover"
                   />
                   <div className="absolute top-4 left-4 text-black z-10 bg-white bg-opacity-75 p-2 rounded-md">
-                    <h3 className="text-lg font-bold">{item.title}</h3>
-                    <p className="text-sm">{item.description}</p>
+                    <h3 className="text-lg font-bold">{collection.name}</h3>
                   </div>
                 </div>
               </Link>

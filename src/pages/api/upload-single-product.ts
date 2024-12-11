@@ -45,6 +45,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { sku, title, description, collection, tags, images, variants } = req.body;
 
+    if (!sku || !title || !collection || !images) {
+      return res.status(400).json({ error: "Missing required fields: sku, title, collection, or images." });
+    }
+
     // Generate slug for collection
     const collectionSlug = slugify(collection);
 
@@ -85,17 +89,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Update tags to use slugs
     const tagSlugs: string[] = (tags as string[]).map((tag) => slugify(tag));
 
-    // Process images for product
+    // Process images for the product
     const processedImages = await Promise.all(images.map((img: string) => uploadImageToStorage(img, "products")));
 
     // Process variants and their images
     const processedVariants = await Promise.all(
-      variants.map(async (variant: { sku: string; images: string | string[] }) => {
-        const variantImages = Array.isArray(variant.images)
-          ? variant.images
-          : variant.images.split(",");
-        const processedVariantImages = await Promise.all(variantImages.map((img: string) => uploadImageToStorage(img, "variants")));
-        return { ...variant, images: processedVariantImages };
+      variants.map(async (variant: { sku: string; images: string[]; options: Array<{ name: string; value: string }> }) => {
+        const processedVariantImages = await Promise.all(
+          variant.images.map((img: string) => uploadImageToStorage(img, "variants"))
+        );
+
+        return {
+          ...variant,
+          images: processedVariantImages,
+          options: variant.options || [], // Ensure options is always an array
+        };
       })
     );
 

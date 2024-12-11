@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 interface Product {
   id: string;
@@ -44,7 +45,7 @@ export default function ProductPage() {
   if (!product)
     return (
       <p className="text-center text-white">
-        Product not found for slug "{productSlug}".
+        Product not found for slug &quot;{productSlug}&quot;.
       </p>
     );
 

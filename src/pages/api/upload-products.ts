@@ -59,7 +59,14 @@ interface CsvRow {
   ProductType?: string;
   description?: string;
   Images?: string;
+  "Option 1 Name"?: string;
+  "Option 1 Value"?: string;
+  "Option 2 Name"?: string;
+  "Option 2 Value"?: string;
+  "Option 3 Name"?: string;
+  "Option 3 Value"?: string;
 }
+
 
 interface ProcessedProduct {
   sku: string;
@@ -74,6 +81,7 @@ interface ProcessedProduct {
 interface Variant {
   sku: string;
   images: string[];
+  options: Array<{ name: string; value: string }>;
 }
 
 // Utility function to process CSV and return structured data
@@ -107,9 +115,22 @@ const processCSV = async (filePath: string): Promise<ProcessedProduct[]> => {
               console.warn("Skipping variant row due to missing SKU:", row);
               return;
             }
+
+            const options = [];
+            if (row["Option 1 Name"] && row["Option 1 Value"]) {
+              options.push({ name: row["Option 1 Name"], value: row["Option 1 Value"] });
+            }
+            if (row["Option 2 Name"] && row["Option 2 Value"]) {
+              options.push({ name: row["Option 2 Name"], value: row["Option 2 Value"] });
+            }
+            if (row["Option 3 Name"] && row["Option 3 Value"]) {
+              options.push({ name: row["Option 3 Name"], value: row["Option 3 Value"] });
+            }
+
             currentProduct.variants.push({
               sku: row.sku,
               images: row.Images ? row.Images.split(",").map((img) => img.trim()) : [],
+              options,
             });
           } else {
             console.warn("Skipping row due to invalid Type or missing parent product:", row);
@@ -173,34 +194,41 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       // Ensure SubCollections exist and create/update them
-      for (const tag of tags) {
-        const tagSlug = slugify(tag);
-        const subCollectionRef = db.collection("SubCollections").doc(tagSlug);
-        const subCollectionDoc = await subCollectionRef.get();
+// Ensure SubCollections exist and create/update them
+for (const tag of tags) {
+  const tagSlug = slugify(tag);
+  const subCollectionRef = db.collection("SubCollections").doc(tagSlug);
+  const subCollectionDoc = await subCollectionRef.get();
 
-        if (!subCollectionDoc.exists) {
-          await subCollectionRef.set({
-            name: tag,
-            slug: tagSlug,
-            collections: [collectionSlug],
-          });
-        } else {
-          const existingCollections = subCollectionDoc.data()?.collections || [];
-          if (!existingCollections.includes(collectionSlug)) {
-            await subCollectionRef.update({
-              collections: admin.firestore.FieldValue.arrayUnion(collectionSlug),
-            });
-          }
-        }
-      }
+  if (!subCollectionDoc.exists) {
+    // Create a new subcollection with the reference to the collection
+    await subCollectionRef.set({
+      name: tag,
+      slug: tagSlug,
+      collections: [collectionSlug], // Add the parent collection slug
+    });
+  } else {
+    // Update existing subcollection to include the current collectionSlug
+    const existingCollections = subCollectionDoc.data()?.collections || [];
+    if (!existingCollections.includes(collectionSlug)) {
+      await subCollectionRef.update({
+        collections: admin.firestore.FieldValue.arrayUnion(collectionSlug),
+      });
+    }
+  }
+}
+
 
       const processedImages = await Promise.all(images.map((img) => uploadImageToStorage(img, "products")));
       const processedVariants = await Promise.all(
         variants.map(async (variant) => {
-          const processedVariantImages = await Promise.all(variant.images.map((img) => uploadImageToStorage(img, "variants")));
-          return { ...variant, images: processedVariantImages };
+          const processedVariantImages = await Promise.all(
+            variant.images.map((img) => uploadImageToStorage(img, "variants"))
+          );
+          return { ...variant, images: processedVariantImages, options: variant.options || [] };
         })
       );
+      
 
       const productRef = db.collection("Products").doc(sku);
       await productRef.set({

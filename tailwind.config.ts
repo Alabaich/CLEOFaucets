@@ -11,6 +11,7 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        'visited-link': '#ffffff', // Add your desired color here
       },
     },
   },

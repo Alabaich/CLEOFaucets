@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -15,7 +15,12 @@ interface Product {
   title: string;
   tags: string[];
   images: string[];
-  slug: string; // Add slug to the product type
+  slug: string;
+  variants?: { 
+    sku: string; 
+    images: string[]; 
+    options: { name: string; value: string }[] 
+  }[]; 
 }
 
 export default function SubCollectionPage() {
@@ -62,14 +67,15 @@ export default function SubCollectionPage() {
   if (!subcollection)
     return (
       <p className="text-center text-white">
-        Subcollection not found for collection "{collectionSlug}" and subcollection "{subcollectionSlug}".
+        Subcollection not found for collection &quot;{collectionSlug}&quot; and
+        subcollection &quot;{subcollectionSlug}&quot;.
       </p>
     );
 
   return (
-    <div className="text-center my-10 w-full mx-auto">
+    <div className="text-center my-10 w-full mx-auto px-4">
       <button
-        className="mb-4 bg-blue-500 text-white py-2 px-4 rounded"
+        className="mb-4 bg-transparent hover:bg-transparent text-white py-2 px-4 rounded"
         onClick={() => router.back()}
       >
         Back
@@ -80,23 +86,53 @@ export default function SubCollectionPage() {
       {products.length === 0 ? (
         <p className="text-white mt-4">No products found for this subcollection.</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <div className=" fullWidth grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
           {products.map((product) => (
             <Link
               key={product.id}
-              href={`/collections/${collectionSlug}/${subcollectionSlug}/products/${product.slug}`}
+              href={`/collections/${collectionSlug}/${subcollectionSlug}/${product.slug}`}
               className="group"
             >
-              <div className="rounded-md overflow-hidden shadow-md p-4 bg-white text-black">
-                <h3 className="text-lg font-semibold">{product.title}</h3>
-                {product.images.length > 0 && (
-                  <img
-                    src={product.images[0]}
-                    alt={product.title}
-                    className="w-full h-40 object-cover mt-2"
-                  />
+              <div className=" rounded overflow-hidden shadow-md p-0 bg-transparent text-white border border-gray-700">
+                <div className="w-full aspect-square overflow-hidden mb-4">
+                  {product.images.length > 0 && (
+                    <img
+                      src={product.images[0]}
+                      alt={product.title}
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
+                    />
+                  )}
+                </div>
+                <div className="p-2">
+                <h3 className="text-lg font-semibold mb-2 text-left">{product.title}</h3>
+                <p className="text-sm mb-2 text-left">Tags: {product.tags.join(", ")}</p>
+
+                {/* Variants as square images */}
+                {product.variants && product.variants.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {product.variants.map((variant, index) => (
+                      <div
+                        key={index}
+                        className="relative w-16 h-10 border border-gray-500 rounded-md overflow-hidden"
+                      >
+                        {/* Variant Image */}
+                        {variant.images[0] && (
+                          <img
+                            src={variant.images[0]}
+                            alt={`Variant ${index}`}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                        {/* Option Values */}
+                        <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-75 text-[8px] text-white p-1 text-center">
+                          {variant.options.map((option) => option.value).join(", ")}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
-                <p className="mt-2 text-sm">Tags: {product.tags.join(", ")}</p>
+                </div>
+
               </div>
             </Link>
           ))}

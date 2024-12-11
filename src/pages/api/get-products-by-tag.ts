@@ -17,7 +17,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    console.log("Fetching products with tag:", tag);
+
 
     // Query Firestore for products with the given tag in their `tags` array
     const productsSnapshot = await db
@@ -25,7 +25,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       .where("tags", "array-contains", tag)
       .get();
 
-    console.log("Query executed. Matching documents count:", productsSnapshot.size);
+
 
     if (productsSnapshot.empty) {
       return res.status(404).json({ products: [] });
@@ -37,7 +37,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       ...doc.data(),
     }));
 
-    console.log("Products found:", products);
 
     return res.status(200).json({ products });
   } catch (error) {

@@ -5,6 +5,8 @@ import admin from "../../utils/firebaseAdmin";
 const db = admin.firestore();
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+
+
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -17,18 +19,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    console.log("Fetching products for collection:", collection);
+    // First, verify the slug exists in the `Collections` collection
+    const collectionSnapshot = await db
+      .collection("Collections")
+      .where("slug", "==", collection)
+      .get();
 
-    // Query Firestore for products where the `collection` field matches the given collectionSlug
+    if (collectionSnapshot.empty) {
+      console.warn("Collection not found for slug:", collection);
+      return res.status(404).json({ error: "Collection not found" });
+    }
+
+    // Query the `Products` collection for matching products
     const productsSnapshot = await db
       .collection("Products")
       .where("collection", "==", collection)
       .get();
 
-    console.log("Query executed. Matching documents count:", productsSnapshot.size);
-
     if (productsSnapshot.empty) {
-      console.warn("No products found for collection:", collection);
+      console.warn("No products found for collection slug:", collection);
       return res.status(404).json({ products: [] });
     }
 
@@ -37,8 +46,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       id: doc.id,
       ...doc.data(),
     }));
-
-    console.log("Products found:", products);
 
     return res.status(200).json({ products });
   } catch (error) {

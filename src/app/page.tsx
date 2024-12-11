@@ -9,7 +9,7 @@ import Innovation from "@/components/Innovations";
 
 const HomePage = () => {
   return (
-    <main className="flex flex-col gap-[150px]">
+    <main className="flex flex-col gap-[50px]">
       <div className="fullWidth ">
         <Carousel />
       </div>

@@ -25,7 +25,7 @@ const RichText: React.FC<RichTextProps> = ({ title, text, buttonText, buttonLink
       {buttonText && buttonLink && (
         <Link
           href={buttonLink}
-          className="px-4 py-2 text-[#2c2d2c] font-bold bg-blue-50 rounded hover:bg-[#2c2d2c] hover:text-white transition-colors duration-300"
+          className="px-4 py-2 text-white font-bold bg-transparent rounded hover:bg-grey-600 hover:text-white transition-colors duration-300"
         >
           {buttonText}
         </Link>

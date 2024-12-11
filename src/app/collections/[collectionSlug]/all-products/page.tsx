@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Product {
   id: string;
   title: string;
   collection: string;
   images: string[];
+  slug: string; // Add slug to the product type
 }
 
 export default function AllProductsPage() {
@@ -68,8 +70,12 @@ export default function AllProductsPage() {
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
         {products.map((product) => (
-          <div key={product.id} className="group">
-            <div className="rounded-md overflow-hidden shadow-md group p-4 bg-white text-black">
+          <Link
+            key={product.id}
+            href={`/collections/${collectionSlug}/products/${product.slug}`}
+            className="group"
+          >
+            <div className="rounded-md overflow-hidden shadow-md p-4 bg-white text-black">
               <h3 className="text-lg font-semibold">{product.title}</h3>
               {product.images.length > 0 && (
                 <img
@@ -80,7 +86,7 @@ export default function AllProductsPage() {
               )}
               <p className="mt-2 text-sm">Collection: {product.collection}</p>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

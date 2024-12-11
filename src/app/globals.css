@@ -188,3 +188,23 @@ button:hover {
 .articleContainer code {
   padding: 2px 4px;
 }
+
+
+
+a:visited {
+  color: inherit !important; /* Ensures visited links inherit the normal text color */
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: #FFFFFF !important; /* Change arrow color to white */
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  color: #d4d4d4 !important; /* Change arrow color on hover (e.g., red) */
+}
+
+:root {
+  --swiper-theme-color: var(#FFF) !important; /* Replace with your color variable */
+}

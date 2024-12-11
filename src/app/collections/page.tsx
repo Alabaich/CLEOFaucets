@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
 interface Collection {
   id: string;
   name: string;
   slug: string;
+  image?: string | null; // Optional image field to handle missing images
 }
 
 export default function Collections() {
@@ -50,9 +51,15 @@ export default function Collections() {
         {collections.map((collection) => (
           <div key={collection.id} className="group">
             <Link href={`/collections/${collection.slug}`} className="hover:no-underline block">
-              {/* Removed <a> tag */}
               <div className="rounded-md overflow-hidden shadow-md group p-4 bg-white text-black">
-                <h3 className="text-lg font-semibold">{collection.name}</h3>
+                <div className="relative">
+                  <img
+                    src={collection.image || "/placeholder.webp"} // Use placeholder if image is not available
+                    alt={collection.name}
+                    className="w-full h-48 object-cover rounded-md"
+                  />
+                </div>
+                <h3 className="text-lg font-semibold mt-4">{collection.name}</h3>
                 <p className="mt-2 text-sm">Explore products in this collection.</p>
               </div>
             </Link>
