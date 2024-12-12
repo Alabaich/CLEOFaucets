@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
@@ -38,8 +37,8 @@ const Header = () => {
     <header className="w-full bg-gray-900 fixed top-0 left-0 z-50">
       <div className="flex items-center justify-between w-full p-4 sm:hidden">
         <Link href="/">
-          <Image
-            src="/images/logo.png"
+          <img
+            src="https://firebasestorage.googleapis.com/v0/b/cleo-plumbing.firebasestorage.app/o/images%2Flogo.webp?alt=media&token=8109231c-272d-4e0b-9cb6-b0aa2707eba2"
             alt="Cleo Plumbing Logo"
             width={120}
             height={60}
@@ -172,8 +171,8 @@ const Header = () => {
 
       <div className="hidden sm:flex items-center justify-between fullWidth p-4">
         <Link href="/">
-          <Image
-            src="/images/logo.png"
+          <img
+            src="https://firebasestorage.googleapis.com/v0/b/cleo-plumbing.firebasestorage.app/o/images%2Flogo.webp?alt=media&token=8109231c-272d-4e0b-9cb6-b0aa2707eba2"
             alt="Cleo Plumbing Logo"
             width={120}
             height={60}

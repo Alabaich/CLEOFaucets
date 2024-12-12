@@ -56,14 +56,14 @@ export default function Breadcrumbs() {
         {breadcrumbs.map((breadcrumb, index) => (
           <li key={index} className="inline-flex items-center">
             {index < breadcrumbs.length - 1 ? (
-              <Link href={breadcrumb.href} className="text-grey-50 underline">
+              <Link href={breadcrumb.href} className="text-grey-200 underline">
                 {breadcrumb.label}
               </Link>
             ) : (
-              <span className="text-gray-50">{breadcrumb.label}</span>
+              <span className="text-gray-200 hidden md:block">{breadcrumb.label}</span>
             )}
             {index < breadcrumbs.length - 1 && (
-              <span className="mx-2 text-gray-500">/</span>
+              <span className="mx-2 text-gray-500 hidden md:block">/</span>
             )}
           </li>
         ))}

@@ -42,6 +42,12 @@ body{
   padding-top: 30px;
 }
 
+@media screen and (max-width: 650px) {
+  body{
+    padding-top: 50px;
+  }
+}
+
 a {
   color: #ffffff; /* Accent color for links */
   text-decoration: none;

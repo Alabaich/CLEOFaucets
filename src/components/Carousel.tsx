@@ -6,8 +6,6 @@ import { Pagination, Autoplay } from "swiper/modules"; // Correct import for Swi
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/autoplay";
-import Image from "next/image";
-import Link from "next/link";
 
 interface Slide {
   id: string;
@@ -55,22 +53,24 @@ const Carousel = () => {
       autoplay={{ delay: 6000, disableOnInteraction: false }}
       loop={true}
       speed={600}
-      className="w-full h-[155px] sm:h-[350px] lg:h-[500px] 2xl:h-[600px] mb-10 rounded"
+      className="w-full h-[155px] sm:h-[414px] lg:h-[500px] 2xl:h-[600px]  rounded"
     >
       {slides.map((slide) => (
         <SwiperSlide
           key={slide.id}
           className="relative w-full h-full"
         >
-          <Link href={slide.link} passHref>
-            <Image
+          <a
+            href={slide.link}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
               src={slide.imageUrl}
               alt={`Promotion Slide ${slide.id}`}
-              fill
-              style={{ objectFit: "cover" }}
-              priority
+              className="w-full h-full object-cover rounded"
             />
-          </Link>
+          </a>
         </SwiperSlide>
       ))}
     </Swiper>

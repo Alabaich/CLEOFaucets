@@ -5,35 +5,35 @@ const ContactPage = () => {
       <section className="w-full max-w-4xl flex flex-col md:flex-row gap-8 mb-12">
         {/* Map and Address */}
         <div className="flex-1">
-          <h2 className="text-2xl font-bold mb-4">Our Location</h2>
+          <h2 className="text-2xl font-bold mb-4">Where to Buy</h2>
           <iframe
             className="w-full h-64 rounded-md border-2 border-gray-700"
-            src="https://www.google.com/maps?q=131+Whitmore+Rd,+Vaughan,+ON+L4L+6E3&ftid=0x882b2ff478581d2d:0x584b37d095693b71&entry=gps"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2880.3972388867855!2d-79.5544243!3d43.78536959999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x882b2f0dab9bf36f%3A0x490f213d8ecc0d16!2sPlumbing%20Market!5e0!3m2!1sen!2sca!4v1733934009910!5m2!1sen!2sca"
             allowFullScreen
             loading="lazy"
           ></iframe>
           <p className="mt-4 text-gray-400">
-            131 Whitmore Rd, Vaughan, ON L4L 6E3
+            131 Whitmore Rd, Unit 11, Vaughan, ON L4L 6E3. Exclusively at Plumbing Market
           </p>
         </div>
 
         {/* Contact Information */}
         <div className="flex-1">
-          <h2 className="text-2xl font-bold mb-4">Contact Us</h2>
+          <h2 className="text-2xl font-bold mb-4">Become a Partner</h2>
           <p className="mb-4">
             Have questions or need assistance? We&apos;re here to help!
           </p>
           <div className="flex items-center gap-2 text-lg">
             <span className="text-gray-400">📞</span>
             <a href="tel:+16475638441" className="hover:text-blue-500">
-              +1 (647) 563-8441
+              +1 (289) 236-2378
             </a>
           </div>
         </div>
       </section>
 
-      {/* Contact Form Section */}
-      <section className="w-full max-w-4xl bg-gray-800 p-6 rounded-md shadow-md">
+
+      {/* <section className="w-full max-w-4xl bg-gray-800 p-6 rounded-md shadow-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Send Us a Message</h2>
         <form className="flex flex-col gap-4">
           <div>
@@ -79,7 +79,7 @@ const ContactPage = () => {
             Send Message
           </button>
         </form>
-      </section>
+      </section> */}
     </main>
   );
 };

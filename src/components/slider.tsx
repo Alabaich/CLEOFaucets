@@ -87,18 +87,18 @@ const HorizontalScroller = () => {
           {collections.map((collection) => (
             <div
               key={collection.id}
-              className="rf-cards-scroller-item flex-shrink-0 w-[350px] md:w-[480px] h-[350px] flex items-center justify-center snap-center"
+              className="rf-cards-scroller-item flex-shrink-0 w-[250px] md:w-[480px] h-[150px] md:h-[350px] flex items-center justify-center snap-center"
             >
               <Link
                 href={`/collections/${collection.slug}`}
-                className="rf-ccard block rounded-lg overflow-hidden text-decoration-none transform transition-all duration-300 ease-in-out hover:scale-105"
+                className="h-full rf-ccard block rounded-lg overflow-hidden text-decoration-none transform transition-all duration-300 ease-in-out hover:scale-105"
                 style={{ textDecoration: "none" }}
               >
-                <div className="relative">
+                <div className="relative h-full">
                   <img
                     src={collection.image || "https://firebasestorage.googleapis.com/v0/b/cleo-plumbing.firebasestorage.app/o/images%2FPlaceholder.webp?alt=media&token=28081801-2e80-4a97-a8af-c5f84a622d0b"} // Use placeholder if no image
                     alt={collection.name}
-                    className="w-full h-72 object-cover"
+                    className="w-full h-[100%] md:h-72 object-cover"
                   />
                   <div className="absolute top-4 left-4 text-black z-10 bg-white bg-opacity-75 p-2 rounded-md">
                     <h3 className="text-lg font-bold">{collection.name}</h3>

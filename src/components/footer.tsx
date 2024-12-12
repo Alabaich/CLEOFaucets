@@ -9,8 +9,8 @@ const Footer = () => {
       {/* Logo Section */}
       <div className="flex items-center justify-center">
         <Link href="/">
-          <Image
-            src="/images/logo.png"
+          <img
+            src="https://firebasestorage.googleapis.com/v0/b/cleo-plumbing.firebasestorage.app/o/images%2Flogo.webp?alt=media&token=8109231c-272d-4e0b-9cb6-b0aa2707eba2"
             alt="Cleo Plumbing Logo"
             width={120}
             height={60}
