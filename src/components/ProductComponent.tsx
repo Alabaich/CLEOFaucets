@@ -197,9 +197,12 @@ const ProductComponent: React.FC<ProductComponentProps> = ({ product }) => {
         </div>
       </div>
       <div
-        dangerouslySetInnerHTML={{ __html: he.decode(product.description) }}
-        className="text-lg mt-4"
-      />
+  dangerouslySetInnerHTML={{
+    __html: he.decode(product.description).replace(/^"|"$/g, "").trim(),
+  }}
+  className="text-lg mt-4"
+/>
+
     </div>
   );
 };
