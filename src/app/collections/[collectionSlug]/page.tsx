@@ -16,17 +16,19 @@ interface CollectionDetails {
 }
 
 // Metadata Generation Function
-// Metadata Generation Function
 export async function generateMetadata({
   params,
 }: {
-  params: { collectionSlug: string };
+  params: Promise<{ collectionSlug: string }>;
 }): Promise<Metadata> {
-  const { collectionSlug } = params;
+  // Await the promise to get the actual params object
+  const resolvedParams = await params;
+  const { collectionSlug } = resolvedParams;
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/get-collection-by-slug?slug=${collectionSlug}`, {
-    next: { revalidate: 60 }, // Optional caching
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/get-collection-by-slug?slug=${collectionSlug}`,
+    { next: { revalidate: 60 } }
+  );
 
   if (!res.ok) {
     console.error("Error fetching metadata:", res.status, res.statusText);
@@ -36,8 +38,8 @@ export async function generateMetadata({
     };
   }
 
-  const data = await res.json(); // Ensure this matches the API response
-  const collection = data.collection; // Access 'collection' field correctly
+  const data = await res.json();
+  const collection = data.collection;
 
   if (!collection) {
     console.error("Collection metadata not found in response:", data);
@@ -46,8 +48,6 @@ export async function generateMetadata({
       description: "The collection you are looking for does not exist.",
     };
   }
-
-
 
   return {
     title: `${collection.name} - Cleo Faucets`,
@@ -74,7 +74,6 @@ export async function generateMetadata({
   };
 }
 
-
 // Fetch Collection Details
 async function fetchCollectionDetails(collectionSlug: string): Promise<CollectionDetails | null> {
   const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/get-collection-by-slug?slug=${collectionSlug}`;
@@ -86,10 +85,8 @@ async function fetchCollectionDetails(collectionSlug: string): Promise<Collectio
   }
 
   const data = await res.json();
-
-  return data.collection || null; // Return the collection field
+  return data.collection || null;
 }
-
 
 // Fetch Subcollections
 async function fetchSubcollections(collectionSlug: string): Promise<SubCollection[]> {
@@ -99,7 +96,6 @@ async function fetchSubcollections(collectionSlug: string): Promise<SubCollectio
   );
 
   if (!res.ok) return [];
-
   const data = await res.json();
   return data.subcollections || [];
 }
@@ -109,7 +105,8 @@ export default async function CollectionPage({
 }: {
   params: Promise<{ collectionSlug: string }>;
 }) {
-  const resolvedParams = await params; // Await params if it's a Promise
+  // Await the promise to get the actual params object
+  const resolvedParams = await params;
   const { collectionSlug } = resolvedParams;
 
   const [collectionDetails, subcollections] = await Promise.all([
@@ -120,9 +117,10 @@ export default async function CollectionPage({
   if (!collectionDetails) {
     return (
       <div className="text-center my-10 w-full mx-auto">
-        <h1 className="text-3xl font-semibold text-white mt-2">Collection Not Found</h1>
+        <h1 className="text-3xl font-semibold text-white mt-2">
+          Collection Not Found
+        </h1>
         <div className="mt-4">
-          {/* Use Link component for navigation */}
           <Link href="/collections" className="bg-white text-black py-2 px-4 rounded">
             Go Back to Collections
           </Link>
