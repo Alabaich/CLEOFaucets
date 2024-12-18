@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import admin from "../../utils/firebaseAdmin";
 
-// Initialize Firestore
 const db = admin.firestore();
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -19,6 +18,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Query collection by slug
     const collectionsSnapshot = await db.collection("Collections").where("slug", "==", slug).get();
 
+
+
     if (collectionsSnapshot.empty) {
       return res.status(404).json({ error: "Collection not found" });
     }
@@ -29,11 +30,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       ...collectionDoc.data(),
     };
 
-    res.status(200).json(collectionData);
+
+
+    res.status(200).json({ collection: collectionData });
   } catch (error) {
     console.error("Error fetching collection by slug:", error);
     res.status(500).json({ error: "Failed to fetch collection" });
   }
 };
+
 
 export default handler;

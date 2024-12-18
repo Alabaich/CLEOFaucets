@@ -1,148 +1,141 @@
-"use client";
-
-import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import CollectionDetailsComponent from "@/components/CollectionDetailsComponent";
+import { Metadata } from "next";
 
 interface SubCollection {
   id: string;
   name: string;
   slug: string;
-  image?: string | null; // Add optional image property
+  image?: string | null;
 }
 
 interface CollectionDetails {
-  name: string; // The collection's title
+  name: string;
   description?: string | null;
   image?: string | null;
 }
 
-export default function CollectionPage() {
-  const params = useParams() || {}; // Ensure params is never null
-  const router = useRouter();
+// Metadata Generation Function
+// Metadata Generation Function
+export async function generateMetadata({
+  params,
+}: {
+  params: { collectionSlug: string };
+}): Promise<Metadata> {
+  const { collectionSlug } = params;
 
-  // Safely extract collectionSlug
-  const collectionSlug =
-    typeof params.collectionSlug === "string" ? params.collectionSlug : params.collectionSlug?.[0];
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/get-collection-by-slug?slug=${collectionSlug}`, {
+    next: { revalidate: 60 }, // Optional caching
+  });
 
-  const [collectionDetails, setCollectionDetails] = useState<CollectionDetails | null>(null);
-  const [subcollections, setSubcollections] = useState<SubCollection[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    if (!collectionSlug) {
-      console.error("Missing collectionSlug in the URL params!");
-      return;
-    }
-
-    const fetchData = async () => {
-      try {
-        // Fetch collection details
-        const collectionDetailsRes = await fetch(`/api/get-collection-details?slug=${collectionSlug}`);
-        if (!collectionDetailsRes.ok) {
-          throw new Error("Failed to fetch collection details");
-        }
-        const collectionDetailsData = await collectionDetailsRes.json();
-        setCollectionDetails(collectionDetailsData.collection);
-
-        // Fetch subcollections
-        const subcollectionsRes = await fetch(
-          `/api/get-subcollections-by-collection-slug?collectionSlug=${collectionSlug}`
-        );
-        if (!subcollectionsRes.ok) {
-          throw new Error("Failed to fetch subcollections");
-        }
-        const subcollectionsData = await subcollectionsRes.json();
-        setSubcollections(subcollectionsData.subcollections);
-      } catch (error) {
-        console.error("Error fetching collection or subcollections:", error);
-      } finally {
-        setLoading(false);
-      }
+  if (!res.ok) {
+    console.error("Error fetching metadata:", res.status, res.statusText);
+    return {
+      title: "Collection Not Found - Cleo Faucets",
+      description: "The collection you are looking for does not exist.",
     };
-
-    fetchData();
-  }, [collectionSlug]);
-
-  if (loading) {
-    return <p className="text-center text-white">Loading...</p>;
   }
+
+  const data = await res.json(); // Ensure this matches the API response
+  const collection = data.collection; // Access 'collection' field correctly
+
+  if (!collection) {
+    console.error("Collection metadata not found in response:", data);
+    return {
+      title: "Collection Not Found - Cleo Faucets",
+      description: "The collection you are looking for does not exist.",
+    };
+  }
+
+
+
+  return {
+    title: `${collection.name} - Cleo Faucets`,
+    description: collection.description || "Explore our wide range of products in this collection.",
+    openGraph: {
+      title: `${collection.name} - Cleo Faucets`,
+      description: collection.description || "Explore our wide range of products in this collection.",
+      url: `https://www.cleofaucets.com/collections/${collectionSlug}`,
+      images: [
+        {
+          url: collection.image || "https://via.placeholder.com/1200x630",
+          width: 1200,
+          height: 630,
+          alt: collection.name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${collection.name} - Cleo Faucets`,
+      description: collection.description || "Explore our wide range of products in this collection.",
+      images: [collection.image || "https://via.placeholder.com/1200x630"],
+    },
+  };
+}
+
+
+// Fetch Collection Details
+async function fetchCollectionDetails(collectionSlug: string): Promise<CollectionDetails | null> {
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/get-collection-by-slug?slug=${collectionSlug}`;
+  const res = await fetch(apiUrl, { next: { revalidate: 60 } });
+
+  if (!res.ok) {
+    console.error("Error fetching collection:", res.status, res.statusText);
+    return null;
+  }
+
+  const data = await res.json();
+
+  return data.collection || null; // Return the collection field
+}
+
+
+// Fetch Subcollections
+async function fetchSubcollections(collectionSlug: string): Promise<SubCollection[]> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/get-subcollections-by-collection-slug?collectionSlug=${collectionSlug}`,
+    { next: { revalidate: 60 } }
+  );
+
+  if (!res.ok) return [];
+
+  const data = await res.json();
+  return data.subcollections || [];
+}
+
+export default async function CollectionPage({
+  params,
+}: {
+  params: Promise<{ collectionSlug: string }>;
+}) {
+  const resolvedParams = await params; // Await params if it's a Promise
+  const { collectionSlug } = resolvedParams;
+
+  const [collectionDetails, subcollections] = await Promise.all([
+    fetchCollectionDetails(collectionSlug),
+    fetchSubcollections(collectionSlug),
+  ]);
 
   if (!collectionDetails) {
     return (
-      <div className="text-center my-10 md:my-10 w-full mx-auto fullWidth">
+      <div className="text-center my-10 w-full mx-auto">
         <h1 className="text-3xl font-semibold text-white mt-2">Collection Not Found</h1>
-        <button
-          className="mt-4 bg-white text-black py-2 px-4 rounded"
-          onClick={() => router.push(`/collections`)}
-        >
-          Go Back to Collections
-        </button>
-      </div>
-    );
-  }
-
-  if (subcollections.length === 0) {
-    return (
-      <div className="text-center my-10 md:my-10 w-full mx-auto fullWidth">
-        <h1 className="text-3xl font-semibold text-white mt-2">
-          No Subcollections Found
-        </h1>
-        <button
-          className="mt-4 bg-white text-black py-2 px-4 rounded"
-          onClick={() => router.push(`/collections/${collectionSlug}/all-products`)}
-        >
-          Go To All Products
-        </button>
+        <div className="mt-4">
+          {/* Use Link component for navigation */}
+          <Link href="/collections" className="bg-white text-black py-2 px-4 rounded">
+            Go Back to Collections
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="text-center my-10 md:my-10 w-full mx-auto fullWidth">
-      {/* Full-width image */}
-      <div className="w-full h-80 bg-gray-200">
-        <img
-          src={collectionDetails.image || "https://firebasestorage.googleapis.com/v0/b/cleo-plumbing.firebasestorage.app/o/images%2FPlaceholder.webp?alt=media&token=28081801-2e80-4a97-a8af-c5f84a622d0b"} // Placeholder if image is missing
-          alt={collectionDetails.name || "Placeholder"}
-          className="w-full h-full object-cover"
-        />
-      </div>
-
-      {/* Collection name */}
-      <h1 className="text-4xl font-semibold text-white mt-6">
-        {collectionDetails.name}
-      </h1>
-
-      {/* Collection description */}
-      {collectionDetails.description && (
-        <p className="text-lg text-gray-300 mt-4 px-4 md:px-20">
-          {collectionDetails.description}
-        </p>
-      )}
-
-      {/* Subcollections */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-10">
-        {subcollections.map((subcollection) => (
-          <div
-            key={subcollection.id}
-            className="relative rounded overflow-hidden shadow-lg group cursor-pointer"
-            onClick={() =>
-              router.push(`/collections/${collectionSlug}/${subcollection.slug}`)
-            }
-          >
-            <img
-              src={subcollection.image || "https://firebasestorage.googleapis.com/v0/b/cleo-plumbing.firebasestorage.app/o/images%2FPlaceholder.webp?alt=media&token=28081801-2e80-4a97-a8af-c5f84a622d0b"} // Placeholder if image is missing
-              alt={subcollection.name}
-              className="w-full h-full object-cover aspect-square"
-            />
-            <div className="absolute bottom-0 w-full bg-black bg-opacity-50 py-4 px-2">
-              <h3 className="text-lg font-semibold text-white">
-                {subcollection.name}
-              </h3>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <CollectionDetailsComponent
+      collection={collectionDetails}
+      subcollections={subcollections}
+      collectionSlug={collectionSlug}
+    />
   );
 }
