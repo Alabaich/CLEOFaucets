@@ -26,12 +26,16 @@ const Header = () => {
         const data = await res.json();
         setCollections(data.collections || []);
       } catch (error) {
-        console.error("Error fetching collections:", error);
+        console.error(error);
       }
     };
 
     fetchCollections();
   }, []);
+
+  const handleCollectionClick = () => {
+    setIsMenuOpen(false);
+  };
 
   return (
     <header className="w-full bg-gray-900 fixed top-0 left-0 z-50">
@@ -128,6 +132,7 @@ const Header = () => {
               {collections.map((collection) => (
                 <li key={collection.id}>
                   <Link
+                  onClick={handleCollectionClick}
                     href={`/collections/${collection.slug}`}
                     className={`block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white ${
                       pathname === `/collections/${collection.slug}`
