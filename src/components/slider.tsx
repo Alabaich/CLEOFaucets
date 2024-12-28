@@ -59,7 +59,7 @@ const HorizontalScroller = () => {
   return (
     <div className="w-full">
       <div className="text-center">
-        <h1 className="text-2xl font-bold">Cleo Faucets Collections</h1>
+        <h1 className="text-2xl font-bold mb-4">Cleo Faucets Collections</h1>
       </div>
 
       <div className="group relative w-full">
@@ -91,7 +91,7 @@ const HorizontalScroller = () => {
             >
               <Link
                 href={`/collections/${collection.slug}`}
-                className="h-full rf-ccard block rounded-lg overflow-hidden text-decoration-none transform transition-all duration-300 ease-in-out hover:scale-105"
+                className="h-full w-full rf-ccard block rounded-lg overflow-hidden text-decoration-none transform transition-all duration-300 ease-in-out hover:scale-105"
                 style={{ textDecoration: "none" }}
               >
                 <div className="relative h-full">
