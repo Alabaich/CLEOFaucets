@@ -3,6 +3,20 @@ import admin from "@/utils/firebaseAdmin";
 
 const db = admin.firestore();
 
+
+
+// 1. Create an interface describing your product fields
+interface ProductDoc {
+  id: string;
+  title?: string;
+  sku?: string;
+  variants?: Array<{
+    sku?: string;
+    [key: string]: any;
+  }>;
+  [key: string]: any; // if there may be other fields
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -15,31 +29,39 @@ export default async function handler(
 
   try {
     const searchTerm = query.toString().toLowerCase();
-    const searchTerms = searchTerm.split(/\s+/); // Split query into individual words
+    const searchTerms = searchTerm.split(/\s+/);
 
     // Fetch all products
     const productsRef = db.collection("Products");
     const snapshot = await productsRef.get();
 
-    const results = snapshot.docs
-      .map((doc) => ({ id: doc.id, ...doc.data() }))
-      .filter((product) => {
-        const title = product.title?.toLowerCase() || "";
-        const sku = product.sku?.toLowerCase() || "";
+    // 2. Map each Firestore doc to a typed ProductDoc
+    const allProducts: ProductDoc[] = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...(data as Omit<ProductDoc, "id">), // spread the rest of the fields
+      };
+    });
 
-        const variants = product.variants || []; // Variants array
+    // 3. Filter the typed products
+    const results = allProducts.filter((product) => {
+      const title = product.title?.toLowerCase() || "";
+      const sku = product.sku?.toLowerCase() || "";
+      const variants = product.variants || [];
 
-        const matchingVariants = variants.filter((variant: any) => {
-          const variantSku = variant.sku?.toLowerCase() || "";
-          return variantSku.includes(searchTerm);
-        });
-
-        // Check if all words in the search term are present in the title
-        const matchesTitle = searchTerms.every((term) => title.includes(term));
-
-        // Check if SKU or variants match the search term
-        return matchesTitle || sku.includes(searchTerm) || matchingVariants.length > 0;
+      // Filter variants to see if any variant.sku includes the searchTerm
+      const matchingVariants = variants.filter((variant) => {
+        const variantSku = variant.sku?.toLowerCase() || "";
+        return variantSku.includes(searchTerm);
       });
+
+      // Check if all words in the search term are present in the title
+      const matchesTitle = searchTerms.every((term) => title.includes(term));
+
+      // Check if SKU or variants match the search term
+      return matchesTitle || sku.includes(searchTerm) || matchingVariants.length > 0;
+    });
 
     res.status(200).json(results);
   } catch (error) {

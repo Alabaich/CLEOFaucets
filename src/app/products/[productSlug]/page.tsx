@@ -5,11 +5,21 @@ interface Params {
   productSlug: string;
 }
 
-// Metadata generation function
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const { productSlug } = params;
+/** 
+ * Metadata generation function
+ * - Notice we now type params as Promise<Params> and then await it
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<Params>;
+}): Promise<Metadata> {
+  const resolvedParams = await params; // Await the Promise
+  const { productSlug } = resolvedParams;
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/get-product-by-slug?slug=${productSlug}`);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/get-product-by-slug?slug=${productSlug}`
+  );
   if (!res.ok) {
     return {
       title: "Product Not Found - Cleo Faucets",
@@ -45,17 +55,26 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   };
 }
 
-// Page Component
-export default async function Page({ params }: { params: Params }) {
-  const { productSlug } = params;
+/**
+ * Page Component
+ * - Same idea: destructure `productSlug` after awaiting `params`.
+ */
+export default async function Page({
+  params,
+}: {
+  params: Promise<Params>;
+}) {
+  const resolvedParams = await params; // Await the Promise
+  const { productSlug } = resolvedParams;
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/get-product-by-slug?slug=${productSlug}`);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/get-product-by-slug?slug=${productSlug}`
+  );
   if (!res.ok) {
     return <div>Product not found</div>;
   }
 
   const data = await res.json();
-
   if (!data.product) {
     return <div>Product not found</div>;
   }

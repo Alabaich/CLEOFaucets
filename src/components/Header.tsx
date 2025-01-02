@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import Search from "@/components/Search"; // Import the Search component
+import Search from "@/components/Search";
 
 interface Collection {
   id: string;
@@ -11,11 +11,16 @@ interface Collection {
   name: string;
 }
 
+
 const Header = () => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isCollectionsOpen, setIsCollectionsOpen] = useState(false);
   const [collections, setCollections] = useState<Collection[]>([]);
+
+  // Close the mobile menu whenever the route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const fetchCollections = async () => {
@@ -34,12 +39,9 @@ const Header = () => {
     fetchCollections();
   }, []);
 
-  const handleCollectionClick = () => {
-    setIsMenuOpen(false);
-  };
-
   return (
     <header className="w-full bg-gray-900 fixed top-0 left-0 z-50">
+      {/* Mobile Menu Button */}
       <div className="flex items-center justify-between w-full p-4 sm:hidden">
         <Link href="/">
           <img
@@ -52,6 +54,7 @@ const Header = () => {
         <button
           className="text-white bg-gray-900 border border-white hover:bg-gray-800 focus:ring-2 focus:outline-none focus:ring-gray-300 rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
+          name="Toggle Menu"
         >
           <svg
             className="h-6 w-6"
@@ -72,6 +75,67 @@ const Header = () => {
         </button>
       </div>
 
+      {/* Mobile Search & Nav */}
+      {isMenuOpen && (
+        <div className="sm:hidden bg-gray-900 w-full p-4">
+          {/* Pass the pathname to Search to close dropdown on route change */}
+          <Search pathname={pathname ?? ""} />
+        </div>
+      )}
+
+      <div className={`sm:hidden ${isMenuOpen ? "block" : "hidden"} bg-gray-900 w-full`}>
+        <nav className="flex flex-col gap-2 p-4 justify-center items-center">
+          <Link
+            href="/"
+            className={`text-gray-300 hover:text-white ${
+              pathname === "/" ? "text-white font-semibold" : ""
+            }`}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Home
+          </Link>
+          <Link
+            href="/collections"
+            className={`text-gray-300 hover:text-white ${
+              pathname?.startsWith("/collections")
+                ? "text-white font-semibold"
+                : ""
+            }`}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Collections
+          </Link>
+          <Link
+            href="/about"
+            className={`text-gray-300 hover:text-white ${
+              pathname === "/about" ? "text-white font-semibold" : ""
+            }`}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            About
+          </Link>
+          <Link
+            href="/contact"
+            className={`text-gray-300 hover:text-white ${
+              pathname === "/contact" ? "text-white font-semibold" : ""
+            }`}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Contact
+          </Link>
+          <Link
+            href="/blog"
+            className={`text-gray-300 hover:text-white ${
+              pathname === "/blog" ? "text-white font-semibold" : ""
+            }`}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Blog
+          </Link>
+        </nav>
+      </div>
+
+      {/* Desktop Navbar */}
       <div className="hidden sm:flex items-center justify-between fullWidth p-4 gap-4">
         <Link href="/" className="min-w-[120px]">
           <img
@@ -110,16 +174,11 @@ const Header = () => {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </Link>
             <div className="absolute left-0 w-48 bg-gray-800 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
-              <ul className="">
+              <ul>
                 {collections.map((collection) => (
                   <li key={collection.id}>
                     <Link
@@ -163,8 +222,9 @@ const Header = () => {
             Blog
           </Link>
         </nav>
-        {/* Replace inline search form with the Search component */}
-        <Search />
+
+        {/* Pass the pathname to Search so it can hide dropdown on route change */}
+        <Search pathname={pathname ?? ""}  />
       </div>
     </header>
   );

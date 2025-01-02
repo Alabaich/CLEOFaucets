@@ -18,6 +18,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.cleofaucets.ca"), 
   title: "Cleo Faucets",
   description: "Discover Cleo Faucets - premium faucets and plumbing fixtures.",
   icons: {
