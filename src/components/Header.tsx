@@ -1,8 +1,9 @@
-"use client";
+'use client'
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import Search from "@/components/Search"; // Import the Search component
 
 interface Collection {
   id: string;
@@ -71,111 +72,8 @@ const Header = () => {
         </button>
       </div>
 
-      <nav
-        className={`${
-          isMenuOpen ? "block" : "hidden"
-        } ml-4 mr-4 mb-4 mt-2 sm:hidden flex flex-col gap-4`}
-      >
-        <Link
-          href="/"
-          className={`text-gray-300 hover:text-white ${
-            pathname === "/" ? "text-white font-semibold" : ""
-          }`}
-        >
-          Home
-        </Link>
-
-        <div className="relative">
-          <button
-            onClick={() => setIsCollectionsOpen(!isCollectionsOpen)}
-            className={`text-gray-300 p-0 bg-gray-900 hover:bg-gray-900 hover:text-white flex items-center w-full text-left bg-gray-800 ${
-              pathname?.startsWith("/collections")
-                ? "text-white font-semibold"
-                : ""
-            }`}
-            aria-haspopup="true"
-            aria-expanded={isCollectionsOpen}
-          >
-            Collections
-            <svg
-              className={`ml-1 h-4 w-4 transition-transform duration-200 ${
-                isCollectionsOpen ? "rotate-180" : ""
-              }`}
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
-          <div
-            className={`${
-              isCollectionsOpen ? "block" : "hidden"
-            }  w-full bg-gray-800 rounded-md shadow-lg`}
-          >
-            <ul className="w-full">
-              <li>
-                <Link
-                  href="/collections"
-                  className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                >
-                  All Collections
-                </Link>
-              </li>
-
-              {collections.map((collection) => (
-                <li key={collection.id}>
-                  <Link
-                  onClick={handleCollectionClick}
-                    href={`/collections/${collection.slug}`}
-                    className={`block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white ${
-                      pathname === `/collections/${collection.slug}`
-                        ? "bg-gray-700 text-white"
-                        : ""
-                    }`}
-                  >
-                    {collection.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <Link
-          href="/about"
-          className={`text-gray-300 hover:text-white ${
-            pathname === "/about" ? "text-white font-semibold" : ""
-          }`}
-        >
-          About
-        </Link>
-        <Link
-          href="/contact"
-          className={`text-gray-300 hover:text-white ${
-            pathname === "/contact" ? "text-white font-semibold" : ""
-          }`}
-        >
-          Contact
-        </Link>
-        <Link
-          href="/blog"
-          className={`text-gray-300 hover:text-white ${
-            pathname === "/blog" ? "text-white font-semibold" : ""
-          }`}
-        >
-          Blog
-        </Link>
-      </nav>
-
-      <div className="hidden sm:flex items-center justify-between fullWidth p-4">
-        <Link href="/">
+      <div className="hidden sm:flex items-center justify-between fullWidth p-4 gap-4">
+        <Link href="/" className="min-w-[120px]">
           <img
             src="https://firebasestorage.googleapis.com/v0/b/cleo-plumbing.firebasestorage.app/o/images%2Flogo.webp?alt=media&token=8109231c-272d-4e0b-9cb6-b0aa2707eba2"
             alt="Cleo Plumbing Logo"
@@ -265,6 +163,8 @@ const Header = () => {
             Blog
           </Link>
         </nav>
+        {/* Replace inline search form with the Search component */}
+        <Search />
       </div>
     </header>
   );
