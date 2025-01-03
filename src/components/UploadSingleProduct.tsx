@@ -31,6 +31,21 @@ const UploadSingleProduct = ({ productToEdit }: { productToEdit: any }) => {
     }
   }, [productToEdit]);
 
+  const handleRemoveVariant = (index: number) => {
+    setVariants((prevVariants) =>
+      prevVariants.filter((_, variantIndex) => variantIndex !== index)
+    );
+  };
+
+  // Function to remove an option from a specific variant
+  const handleRemoveOption = (variantIndex: number, optionIndex: number) => {
+    const updatedVariants = [...variants];
+    updatedVariants[variantIndex].options = updatedVariants[variantIndex].options.filter(
+      (_, optIndex) => optIndex !== optionIndex
+    );
+    setVariants(updatedVariants);
+  };
+
   const handleAddVariant = () => {
     setVariants((prevVariants) => [
       ...prevVariants,
@@ -254,6 +269,12 @@ const UploadSingleProduct = ({ productToEdit }: { productToEdit: any }) => {
                 }
                 className="mt-1 p-2 text-gray-900 w-full border-gray-400 border-[1px]"
               />
+                            <button
+                onClick={() => handleRemoveOption(variantIndex, optionIndex)}
+                className="text-red-600 underline mt-2"
+              >
+                Remove Option
+              </button>
             </div>
           ))}
           <button
@@ -262,6 +283,12 @@ const UploadSingleProduct = ({ productToEdit }: { productToEdit: any }) => {
             disabled={variant.options.length >= 3}
           >
             + Add Option
+          </button>
+          <button
+            onClick={() => handleRemoveVariant(variantIndex)}
+            className="text-red-600 underline mt-4"
+          >
+            Remove Variant
           </button>
         </div>
       ))}
