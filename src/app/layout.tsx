@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Header from "../components/Header";
 import Footer from "@/components/footer";
+import SkipLink from "@/components/SkipLink";
 
 
 
@@ -61,9 +62,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <a href="#main-content" className="skip-link text-[#000000]">
-          Skip to main content
-        </a>
+        <SkipLink />
         <Header />
         <main id="main-content">{children}</main>
         <Footer />

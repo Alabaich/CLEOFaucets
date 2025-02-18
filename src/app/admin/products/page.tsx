@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import UploadSingleProduct from "../../../components/UploadSingleProduct";
 import UploadProducts from "../../../components/UploadProducts";
 import { FaEllipsisV } from "react-icons/fa";
+import Link from "next/link";
 
 interface Product {
+  slug: string;
   id: string;
   title: string;
   images: string[];
@@ -143,12 +145,12 @@ const UploadProductsPage = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-                <button
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                  onClick={() => handleEditClick(product)}
-                >
-                  Edit
-                </button>
+              <Link
+        href={`/admin/products/${product.slug}`}
+        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+      >
+        Edit
+      </Link>
                 <button
                   className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
                   onClick={() => handleDeleteClick(product.id)}

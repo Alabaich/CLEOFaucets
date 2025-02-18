@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import admin from "../../utils/firebaseAdmin";
+import admin from "@/utils/firebaseAdmin";
 import fetch from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
 import sharp from "sharp";
@@ -45,14 +45,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { sku, title, description, collection, tags, images, variants } = req.body;
 
-    if (!sku || !title || !collection || !images) {
-      return res.status(400).json({ error: "Missing required fields: sku, title, collection, or images." });
+    // Remove SKU from required fields check; we require title, collection, and images.
+    if (!title || !collection || !images) {
+      return res.status(400).json({ error: "Missing required fields: title, collection, or images." });
     }
 
-    // Generate slug for collection
+    // Generate slug for collection and product
     const collectionSlug = slugify(collection);
-
-    // Generate slug for the product
     const productSlug = slugify(title);
 
     // Ensure Collection exists or create it
@@ -87,36 +86,37 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const tagSlugs = (tags || []).map((tag: string) => slugify(tag));
 
     // Process images for the product
-    const processedImages = await Promise.all(images.map((img: string) => uploadImageToStorage(img, "products")));
-
-    // Process variants and their images
-// Process variants and their images
-const processedVariants = await Promise.all(
-  (variants || []).map(async (variant: { sku: string; images: string[] | string; options: Array<{ name: string; value: string }> }) => {
-    const imagesArray = Array.isArray(variant.images)
-      ? variant.images
-      : typeof variant.images === "string"
-      ? [variant.images]
-      : [];
-
-    const processedVariantImages = await Promise.all(
-      imagesArray.map((img: string) => uploadImageToStorage(img, "variants"))
+    const processedImages = await Promise.all(
+      images.map((img: string) => uploadImageToStorage(img, "products"))
     );
 
-    return {
-      ...variant,
-      images: processedVariantImages,
-      options: variant.options || [],
-    };
-  })
-);
+    // Process variants and their images
+    const processedVariants = await Promise.all(
+      (variants || []).map(async (variant: { sku: string; images: string[] | string; options: Array<{ name: string; value: string }> }) => {
+        const imagesArray = Array.isArray(variant.images)
+          ? variant.images
+          : typeof variant.images === "string"
+          ? [variant.images]
+          : [];
 
+        const processedVariantImages = await Promise.all(
+          imagesArray.map((img: string) => uploadImageToStorage(img, "variants"))
+        );
 
-    // Check if product already exists
-    const productRef = db.collection("Products").doc(sku);
+        return {
+          ...variant,
+          images: processedVariantImages,
+          options: variant.options || [],
+        };
+      })
+    );
+
+    // Always use productSlug as the document ID
+    const productRef = db.collection("Products").doc(productSlug);
     const productDoc = await productRef.get();
 
     if (productDoc.exists) {
+      // Update existing product
       await productRef.update({
         title,
         slug: productSlug,
@@ -127,9 +127,9 @@ const processedVariants = await Promise.all(
         variants: processedVariants,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
-
       res.status(200).json({ message: "Product updated successfully!" });
     } else {
+      // Create new product
       await productRef.set({
         title,
         slug: productSlug,
@@ -140,7 +140,6 @@ const processedVariants = await Promise.all(
         variants: processedVariants,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
-
       res.status(200).json({ message: "Product uploaded successfully!" });
     }
   } catch (error: any) {

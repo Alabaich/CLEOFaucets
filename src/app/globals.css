@@ -38,9 +38,9 @@ html, body {
   color: #e0e0e0; /* Light grey text */
 }
 
-body{
+/* body{
   padding-top: 30px;
-}
+} */
 
 @media screen and (max-width: 650px) {
   body{

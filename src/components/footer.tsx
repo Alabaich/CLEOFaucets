@@ -2,8 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 const Footer = () => {
+  const pathname = usePathname() ?? "";
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <footer className="flex flex-col items-center justify-center gap-6 w-full bg-gray-900 text-gray-300 py-8">
       {/* Logo Section */}
