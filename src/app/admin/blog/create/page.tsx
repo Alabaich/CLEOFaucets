@@ -4,7 +4,6 @@ import React from "react";
 import EditBlog from "../[slug]/Components/EditBlog";
 
 interface Blog {
-  id: string;
   title: string;
   slug: string;
   content: string;
@@ -20,7 +19,6 @@ interface Blog {
 // Create a default blog object to indicate creation mode.
 // Note that draft is now set to true.
 const newBlog: Blog = {
-  id: "",
   content: "",
   createdAt: { _seconds: 0, _nanoseconds: 0 },
   draft: true,

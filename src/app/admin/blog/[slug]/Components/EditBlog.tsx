@@ -6,7 +6,7 @@ import RichTextEditor from "@/components/RichtextEditor";
 import Link from "next/link";
 
 interface Blog {
-    id: string;
+    id?: string;
     title: string;
     slug: string;
     content: string;
@@ -23,6 +23,8 @@ interface EditBlogProps {
 }
 
 const EditBlog: React.FC<EditBlogProps> = ({ blog }) => {
+    const isNew = !blog.id;
+    
     const [title, setTitle] = useState(blog.title);
     const [slug, setSlug] = useState(blog.slug);
     const [content, setContent] = useState(blog.content);
@@ -83,12 +85,15 @@ const EditBlog: React.FC<EditBlogProps> = ({ blog }) => {
         setLoading(true);
         setMessage("");
         try {
-            const res = await fetch("/api/update-single-blog", {
-                method: "PUT", // or "PATCH"
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
+            const endpoint = isNew ? "/api/upload-single-blog" : "/api/update-single-blog";
+            const method = isNew ? "POST" : "PUT";
+      
+            const res = await fetch(endpoint, {
+              method,
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payload),
             });
             const data = await res.json();
             if (!res.ok) {

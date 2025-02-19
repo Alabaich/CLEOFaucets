@@ -7,7 +7,7 @@ import { slugify } from "@/utils/slugify"; // Ensure the correct path
 // Initialize Firestore
 const db = admin.firestore();
 
-// Define the Blog interface (optional but recommended for TypeScript)
+// Extend the Blog interface to include the draft property
 interface Blog {
   id: string;
   title: string;
@@ -17,6 +17,7 @@ interface Blog {
   createdAt: any; // Firestore Timestamp
   tags: string[];
   readingTime: number;
+  draft: boolean;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -26,7 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    const { title, content, image, tags, readingTime } = req.body;
+    const { title, content, image, tags, readingTime, draft } = req.body;
 
     // Basic validation
     if (!title || !content || !image) {
@@ -35,7 +36,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Check for duplicate title to ensure slug uniqueness
     const duplicateTitleQuery = await db.collection("Blogs").where("title", "==", title).get();
-
     if (!duplicateTitleQuery.empty) {
       return res.status(400).json({ error: "A blog with this title already exists." });
     }
@@ -45,7 +45,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Optional: Check if the generated slug already exists (additional safety)
     const duplicateSlugQuery = await db.collection("Blogs").where("slug", "==", baseSlug).get();
-
     if (!duplicateSlugQuery.empty) {
       return res.status(400).json({ error: "A blog with a similar title (slug) already exists." });
     }
@@ -60,6 +59,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       tags: tags || [],
       readingTime: readingTime || 0,
       slug: baseSlug, // Slug based solely on title
+      // Set draft to the provided value, defaulting to true if not specified.
+      draft: draft !== undefined ? draft : true,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     };
 

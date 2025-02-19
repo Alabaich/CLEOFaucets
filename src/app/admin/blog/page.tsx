@@ -5,6 +5,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { useRouter } from "next/navigation";
 import UploadSingleBlog from "../../../components/UploadSingleBlog";
 import { FaEllipsisV } from "react-icons/fa"; // 3 dots icon
+import Link from "next/link";
 
 interface Blog {
   slug: string;
@@ -38,9 +39,9 @@ const UploadBlogsPage = () => {
   const router = useRouter();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loadingBlogs, setLoadingBlogs] = useState<boolean>(true);
-  const [showMenu, setShowMenu] = useState<boolean>(false);
-  const [showUploadSingleBlog, setShowUploadSingleBlog] = useState<boolean>(false);
-  const [blogToEdit, setBlogToEdit] = useState<Blog | null>(null);
+  // Remove showMenu and blogToEdit if no longer needed
+  // const [showMenu, setShowMenu] = useState<boolean>(false);
+  // const [blogToEdit, setBlogToEdit] = useState<Blog | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -80,15 +81,9 @@ const UploadBlogsPage = () => {
     fetchBlogs();
   }, []);
 
-  const handleMenuClick = () => {
-    setShowUploadSingleBlog(true);
-    setShowMenu(false); // Close menu after selection
-  };
-
   const handleEditClick = (blog: Blog) => {
     router.push(`/admin/blog/${blog.slug}`);
-};
-
+  };
 
   const handleDeleteClick = async (blogId: string) => {
     if (!confirm("Are you sure you want to delete this article?")) return;
@@ -112,19 +107,16 @@ const UploadBlogsPage = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-semibold text-black">Blogs</h1>
-        <div className="relative">
-          <FaEllipsisV className="cursor-pointer" size={20} onClick={() => setShowMenu((prev) => !prev)} />
-          {showMenu && (
-            <div className="absolute top-6 right-0 bg-white shadow-md rounded-md p-2 w-40">
-              <button className="text-black w-full text-left py-2 px-4 text-sm hover:bg-blue-100" onClick={handleMenuClick}>
-                Add Blog
-              </button>
-            </div>
-          )}
-        </div>
+        <Link
+          href="/admin/blog/create"
+          className="text-black text-sm py-2 px-4 bg-blue-50 hover:bg-blue-100 rounded-md"
+        >
+          Add Blog
+        </Link>
       </div>
 
-      {showUploadSingleBlog && <UploadSingleBlog blogToEdit={blogToEdit} />}
+      {/* Remove the UploadSingleBlog component if not needed here */}
+      {/* {showUploadSingleBlog && <UploadSingleBlog blogToEdit={blogToEdit} />} */}
 
       {loadingBlogs ? (
         <p>Loading blogs...</p>
@@ -136,10 +128,16 @@ const UploadBlogsPage = () => {
               <h3 className="text-lg font-semibold mt-2 text-white">{blog.title}</h3>
               <p className="text-sm text-gray-400">Updated: {formatDate(blog.updatedAt)}</p>
               <div className="flex justify-between mt-4">
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" onClick={() => handleEditClick(blog)}>
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                  onClick={() => handleEditClick(blog)}
+                >
                   Edit
                 </button>
-                <button className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700" onClick={() => handleDeleteClick(blog.slug)}>
+                <button
+                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                  onClick={() => handleDeleteClick(blog.slug)}
+                >
                   Delete
                 </button>
               </div>
