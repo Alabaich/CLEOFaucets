@@ -34,7 +34,7 @@ export async function GET() {
     ]);
 
     // Define your production domain.
-    const domain = "https://cleofaucets.ca";
+    const domain = "https://cleofaucet.ca";
     const urls: string[] = [];
 
     // Process Blogs – assuming they have a slug field or using document ID.

@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import he from "he";
-import { slugify } from "../../utils/slugify";
+import { slugify } from "@/utils/slugify";
 
 interface Blog {
   id: string;
@@ -13,6 +13,7 @@ interface Blog {
   createdAt: any; // Firestore Timestamp
   tags: string[];
   readingTime: number;
+  draft?: boolean;
 }
 
 export default function Blog() {
@@ -37,7 +38,9 @@ export default function Blog() {
           return dateB - dateA;
         });
 
-        setBlogs(sortedBlogs);
+        const visibleBlogs = sortedBlogs.filter((blog: Blog) => !blog.draft);
+
+        setBlogs(visibleBlogs);
       } catch (error) {
         console.error("Error fetching blogs:", error);
       } finally {

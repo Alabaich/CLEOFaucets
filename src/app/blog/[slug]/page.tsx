@@ -24,6 +24,7 @@ interface Blog {
   createdAt: any; // Firestore Timestamp
   tags: string[];
   readingTime: number;
+  metaDescription?: string;
 }
 
 // 1) Helper function to format date
@@ -105,7 +106,10 @@ export async function generateMetadata(
   }
 
   // Derive description from the first paragraph
-  const description = getFirstParagraph(blog.content);
+  const description =
+    blog.metaDescription && blog.metaDescription.trim() !== ""
+      ? blog.metaDescription
+      : getFirstParagraph(blog.content);
 
   return {
     title: blog.title,
@@ -113,7 +117,7 @@ export async function generateMetadata(
     openGraph: {
       title: blog.title,
       description,
-      url: `https://yourdomain.com/blog/${blog.slug}`,
+      url: `https://cleofaucet.ca/blog/${blog.slug}`,
       images: [
         {
           url: blog.image || "https://via.placeholder.com/1200x630",

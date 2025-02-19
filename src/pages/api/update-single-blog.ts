@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import admin from "../../utils/firebaseAdmin";
-import { slugify } from "../../utils/slugify";
+import admin from "@/utils/firebaseAdmin";
+import { slugify } from "@/utils/slugify";
 
 const db = admin.firestore();
 
@@ -11,6 +11,8 @@ interface BlogUpdatePayload {
   image: string;
   tags: string[];   // array of tag strings
   readingTime: number;
+  metaDescription?: string;
+  draft?: boolean;  // new field for draft status
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -20,7 +22,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    const { id, title, content, image, tags, readingTime } = req.body as BlogUpdatePayload;
+    const { id, title, content, image, tags, readingTime, metaDescription, draft } = req.body as BlogUpdatePayload;
 
     if (!id) {
       return res.status(400).json({ error: "Missing blog ID in request body." });
@@ -38,7 +40,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: "Blog not found." });
     }
 
-    // If the title changed, we might want to update the slug. 
+    // If the title changed, we might want to update the slug.
     // Check if the new title is used by another blog
     const oldData = blogDoc.data();
     let newSlug = oldData?.slug;
@@ -56,25 +58,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       newSlug = baseSlug;
     }
 
-    // Prepare data to update
+    // Prepare data to update, including the new draft field
     const updateData = {
       title,
       content,
       image,
       tags: tags || [],
       readingTime: readingTime || 0,
-      slug: newSlug, 
-      // Optionally update a "updatedAt" field
+      slug: newSlug,
+      metaDescription,
+      draft: draft ?? false,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
 
     // Update the document in Firestore
     await blogRef.update(updateData);
 
-    return res.status(200).json({ 
-      message: "Blog updated successfully!", 
-      blogId: id, 
-      slug: newSlug 
+    return res.status(200).json({
+      message: "Blog updated successfully!",
+      blogId: id,
+      slug: newSlug,
     });
   } catch (error: any) {
     console.error("Error updating blog:", error);

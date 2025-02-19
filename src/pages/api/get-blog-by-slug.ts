@@ -1,7 +1,7 @@
 // pages/api/get-blog-by-slug.ts
 
 import { NextApiRequest, NextApiResponse } from "next";
-import admin from "../../utils/firebaseAdmin";
+import admin from "@/utils/firebaseAdmin";
 
 const db = admin.firestore();
 

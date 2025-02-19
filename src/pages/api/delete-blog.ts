@@ -15,21 +15,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { id } = req.query;
 
-    // Validate the blog ID
+    // Validate the blog slug
     if (!id || typeof id !== "string") {
-      return res.status(400).json({ error: "Invalid blog ID." });
+      return res.status(400).json({ error: "Invalid blog slug." });
     }
 
-    // Check if the blog exists
-    const blogRef = db.collection("Blogs").doc(id);
-    const blogDoc = await blogRef.get();
+    // Query the Blogs collection for a document with a matching slug
+    const blogsRef = db.collection("Blogs");
+    const querySnapshot = await blogsRef.where("slug", "==", id).get();
 
-    if (!blogDoc.exists) {
+    if (querySnapshot.empty) {
       return res.status(404).json({ error: "Blog not found." });
     }
 
-    // Delete the blog
-    await blogRef.delete();
+    // Delete the found document(s)
+    // (Using a batch in case there are multiple documents, though ideally slug is unique.)
+    const batch = db.batch();
+    querySnapshot.docs.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
 
     res.status(200).json({ message: "Blog deleted successfully!" });
   } catch (error: any) {

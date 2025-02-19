@@ -7,14 +7,31 @@ import UploadSingleBlog from "../../../components/UploadSingleBlog";
 import { FaEllipsisV } from "react-icons/fa"; // 3 dots icon
 
 interface Blog {
-  id: string;
+  slug: string;
   title: string;
-  content: string;
   image: string;
-  createdAt: string;
-  tags: string[];
-  readingTime: number;
+  updatedAt: { _seconds?: number; _nanoseconds?: number };
 }
+
+const formatDate = (timestamp: any): string => {
+  if (
+    timestamp &&
+    typeof timestamp._seconds === "number" &&
+    typeof timestamp._nanoseconds === "number"
+  ) {
+    const fireBaseTime = new Date(
+      timestamp._seconds * 1000 + timestamp._nanoseconds / 1000000
+    );
+    const options: Intl.DateTimeFormatOptions = {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    };
+    return fireBaseTime.toLocaleDateString("en-GB", options);
+  } else {
+    return "Unknown Date";
+  }
+};
 
 const UploadBlogsPage = () => {
   const { user, loading } = useAuth();
@@ -39,7 +56,20 @@ const UploadBlogsPage = () => {
           throw new Error("Failed to fetch blogs");
         }
         const data = await res.json();
-        setBlogs(data.blogs);
+        console.log("Raw fetched data:", data.blogs);
+        const sortedBlogs = data.blogs.sort((a: Blog, b: Blog) => {
+          const dateA =
+            typeof a.updatedAt === "string"
+              ? new Date(a.updatedAt).getTime()
+              : ((a.updatedAt?._seconds || 0) * 1000);
+          const dateB =
+            typeof b.updatedAt === "string"
+              ? new Date(b.updatedAt).getTime()
+              : ((b.updatedAt?._seconds || 0) * 1000);
+          return dateB - dateA;
+        });
+        
+        setBlogs(sortedBlogs);
       } catch (error) {
         console.error("Error fetching blogs:", error);
       } finally {
@@ -50,33 +80,24 @@ const UploadBlogsPage = () => {
     fetchBlogs();
   }, []);
 
-  const handleMenuClick = (option: string) => {
-    if (option === "addBlog") {
-      setShowUploadSingleBlog(true);
-    }
+  const handleMenuClick = () => {
+    setShowUploadSingleBlog(true);
     setShowMenu(false); // Close menu after selection
   };
 
   const handleEditClick = (blog: Blog) => {
-    setBlogToEdit(blog);
-    setShowUploadSingleBlog(true);
-  };
+    router.push(`/admin/blog/${blog.slug}`);
+};
+
 
   const handleDeleteClick = async (blogId: string) => {
-    const confirmDelete = confirm("Are you sure you want to delete this article?");
-    if (!confirmDelete) return;
+    if (!confirm("Are you sure you want to delete this article?")) return;
 
     try {
-      const res = await fetch(`/api/delete-blog?id=${blogId}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`/api/delete-blog?id=${blogId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete blog");
 
-      if (!res.ok) {
-        throw new Error("Failed to delete blog");
-      }
-
-      // Remove the deleted blog from state
-      setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== blogId));
+      setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.slug !== blogId));
       alert("Blog deleted successfully!");
     } catch (error) {
       console.error("Error deleting blog:", error);
@@ -84,30 +105,18 @@ const UploadBlogsPage = () => {
     }
   };
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (!user) {
-    return null;
-  }
+  if (loading) return <p>Loading...</p>;
+  if (!user) return null;
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-semibold text-black">Blogs</h1>
         <div className="relative">
-          <FaEllipsisV
-            className="cursor-pointer fill-black stroke-black"
-            size={20}
-            onClick={() => setShowMenu((prev) => !prev)}
-          />
+          <FaEllipsisV className="cursor-pointer" size={20} onClick={() => setShowMenu((prev) => !prev)} />
           {showMenu && (
             <div className="absolute top-6 right-0 bg-white shadow-md rounded-md p-2 w-40">
-              <button
-                className="text-black w-full text-left py-2 px-4 text-sm bg-white hover:bg-blue-100"
-                onClick={() => handleMenuClick("addBlog")}
-              >
+              <button className="text-black w-full text-left py-2 px-4 text-sm hover:bg-blue-100" onClick={handleMenuClick}>
                 Add Blog
               </button>
             </div>
@@ -115,42 +124,22 @@ const UploadBlogsPage = () => {
         </div>
       </div>
 
-      {showUploadSingleBlog && (
-        <UploadSingleBlog blogToEdit={blogToEdit} />
-      )}
+      {showUploadSingleBlog && <UploadSingleBlog blogToEdit={blogToEdit} />}
 
       {loadingBlogs ? (
         <p>Loading blogs...</p>
       ) : blogs.length > 0 ? (
-        <div className="flex flex-wrap gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {blogs.map((blog) => (
-            <div
-              key={blog.id}
-              className="flex justify-between items-center bg-gray-800 p-4 rounded-lg w-full md:w-1/4"
-            >
-              <div className="flex items-center gap-4">
-                <img
-                  src={blog.image} // Show image
-                  alt={blog.title}
-                  className="w-16 h-16 object-cover rounded"
-                />
-                <div>
-                  <h3 className="text-lg font-semibold">{blog.title}</h3>
-                  <p className="text-sm text-gray-400">Reading time: {blog.readingTime} min</p>
-                  <p className="text-sm text-gray-400">Tags: {blog.tags.join(", ")}</p>
-                </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <button
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                  onClick={() => handleEditClick(blog)}
-                >
+            <div key={blog.slug} className="bg-gray-800 p-4 rounded-lg">
+              <img src={blog.image} alt={blog.title} className="w-full h-40 object-cover rounded-md" />
+              <h3 className="text-lg font-semibold mt-2 text-white">{blog.title}</h3>
+              <p className="text-sm text-gray-400">Updated: {formatDate(blog.updatedAt)}</p>
+              <div className="flex justify-between mt-4">
+                <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" onClick={() => handleEditClick(blog)}>
                   Edit
                 </button>
-                <button
-                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                  onClick={() => handleDeleteClick(blog.id)}
-                >
+                <button className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700" onClick={() => handleDeleteClick(blog.slug)}>
                   Delete
                 </button>
               </div>

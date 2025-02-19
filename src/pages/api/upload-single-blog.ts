@@ -1,8 +1,8 @@
 // pages/api/upload-single-blog.ts
 
 import { NextApiRequest, NextApiResponse } from "next";
-import admin from "../../utils/firebaseAdmin";
-import { slugify } from "../../utils/slugify"; // Ensure the correct path
+import admin from "@/utils/firebaseAdmin";
+import { slugify } from "@/utils/slugify"; // Ensure the correct path
 
 // Initialize Firestore
 const db = admin.firestore();
